@@ -7,6 +7,7 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 | Skill | Description | Trigger Phrases |
 |---|---|---|
 | [dbt-model-generator](skills/dbt-model-generator/SKILL.md) | Auto-generate dbt dimensional models (star schema) from raw Snowflake tables | "generate dbt models", "shift left", "dimensional model", "star schema from raw" |
+| [developer-voice](skills/developer-voice/SKILL.md) | Research real developer sentiment from Reddit and community forums, then synthesize into talk tracks, research briefs, or competitive intel grounded in practitioner quotes | "developer voice", "community pulse", "reddit research", "talk track", "what are developers saying", "pain points" |
 
 ## What Are Cortex Code Skills?
 
