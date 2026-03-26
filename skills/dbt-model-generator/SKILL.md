@@ -1,11 +1,19 @@
 ---
 name: dbt-model-generator
-description: "Automatically generate dbt dimensional models (star schema) from raw Snowflake tables. Use when: user wants to generate dbt models, shift left data modeling, automate dimensional modeling, create facts and dimensions from raw data, build a star schema from raw tables, or auto-generate dbt code. Triggers: generate dbt models, shift left, dimensional model, auto model, star schema from raw, dbt from iceberg, dbt from raw."
+description: "Automatically generate dbt dimensional models from raw Snowflake tables. Use when: user wants to generate dbt models, shift left data modeling, automate dimensional modeling, create facts and dimensions from raw data, build a star schema from raw tables, or auto-generate dbt code. Triggers: generate dbt models, shift left, dimensional model, auto model, star schema from raw, dbt from iceberg, dbt from raw, one big table, OBT, wide table."
 ---
 
 # dbt Model Generator
 
-Automates the creation of dbt dimensional models from raw Snowflake tables. Profiles the data, identifies facts and dimensions, generates staging/dim/fact models with tests, and submits a PR for engineer review.
+Automates the creation of dbt models from raw Snowflake tables. Profiles the data, recommends a modeling pattern (star schema, OBT, or wide denormalized), generates staging/dim/fact models with tests, and submits a PR for engineer review.
+
+## Requirements
+
+- **dbt**: `dbt-core>=1.7,<2.0` with `dbt-snowflake>=1.7,<2.0`
+- **Python**: 3.9+
+- **Runtime**: `uv` (preferred), `pipx`, or `pip` — skill auto-detects what's available
+- **Git**: `git` CLI + `gh` CLI for PR creation
+- **Snowflake**: Active CoCo connection or environment-variable-based auth
 
 ## Workflow
 
@@ -16,15 +24,15 @@ Step 1: Collect Parameters
   ↓
 Step 2: Discover & Profile Raw Tables
   ↓
-Step 3: Classify Columns (Facts vs Dimensions)
-  ↓  ⚠️ STOP — User approves classification
+Step 3: Recommend Modeling Pattern
+  ↓  ⚠️ STOP — User approves pattern + classification
 Step 4: Generate dbt Project Scaffold
   ↓
-Step 5: Generate Models (staging → dims → facts)
+Step 5: Generate Models (staging → dims → facts / OBT)
   ↓
 Step 6: Generate Schema Tests & Docs
   ↓
-Step 7: Validate (dbt parse)
+Step 7: Validate (dbt parse + optional dbt run)
   ↓  ⚠️ STOP — User reviews generated models
 Step 8: Git Commit & PR
   ↓
@@ -42,8 +50,8 @@ Done
 - `<PROJECT_NAME>`: dbt project name (default: derived from database name)
 - `<PROJECT_PATH>`: Where to create the project on disk (default: `~/Documents/coco-dev/<PROJECT_NAME>`)
 - `<GITHUB_REPO>`: GitHub repo for PR (format: `owner/repo-name`)
-- `<WAREHOUSE>`: Snowflake warehouse (default: `COMPUTE_WH`)
-- `<ROLE>`: Snowflake role (default: `SYSADMIN`)
+- `<WAREHOUSE>`: Snowflake warehouse (default: use active CoCo connection's warehouse)
+- `<ROLE>`: Snowflake role (default: use active CoCo connection's role)
 
 ### Step 1: Collect Parameters
 
@@ -58,15 +66,19 @@ To generate dimensional models, I need:
 
 If the user provided a database/table in their request, extract those values and only ask for missing parameters.
 
+**Detect active Snowflake connection:** Run `cortex connections list` to get the current connection's account, warehouse, role, and database. Use these as defaults — don't ask the user to re-specify what CoCo already knows.
+
 ### Step 2: Discover & Profile Raw Tables
 
 **Goal:** Understand every table's structure, row counts, column types, cardinality, and relationships.
+
+**⚠️ Cost awareness:** Profiling all tables in a large schema can be expensive. For schemas with >20 tables, ask the user before proceeding. Use `SAMPLE` for tables with >1M rows. An XSMALL warehouse is sufficient for profiling.
 
 **Actions:**
 
 1. **List tables** in the source database/schema:
    ```sql
-   SELECT table_schema, table_name, row_count
+   SELECT table_schema, table_name, row_count, bytes
    FROM <SOURCE_DATABASE>.INFORMATION_SCHEMA.TABLES
    WHERE table_schema = '<SOURCE_SCHEMA>' AND table_type = 'BASE TABLE'
    ORDER BY table_schema, table_name
@@ -75,28 +87,76 @@ If the user provided a database/table in their request, extract those values and
 
 2. **For each table**, get full column metadata:
    ```sql
-   SELECT column_name, data_type, ordinal_position
+   SELECT column_name, data_type, is_nullable, ordinal_position,
+          character_maximum_length, numeric_precision, numeric_scale
    FROM <SOURCE_DATABASE>.INFORMATION_SCHEMA.COLUMNS
    WHERE table_schema = '<schema>' AND table_name = '<table>'
    ORDER BY ordinal_position
    ```
 
-3. **Profile each table** — sample data to understand values:
+3. **Statistical profiling** per table — do NOT use `SELECT * LIMIT N` (too weak for understanding distributions):
    ```sql
-   SELECT * FROM <SOURCE_DATABASE>.<schema>.<table> LIMIT 20
+   -- For tables ≤1M rows, scan directly. For >1M rows, use SAMPLE.
+   SELECT
+     '<col>' AS column_name,
+     COUNT(*) AS total_rows,
+     COUNT("<col>") AS non_null_count,
+     ROUND(COUNT_IF("<col>" IS NULL) * 100.0 / COUNT(*), 1) AS null_pct,
+     APPROX_COUNT_DISTINCT("<col>") AS approx_distinct,
+     MIN("<col>")::VARCHAR AS min_val,
+     MAX("<col>")::VARCHAR AS max_val
+   FROM <SOURCE_DATABASE>.<schema>.<table>
+   -- Add: SAMPLE (100000 ROWS) for tables with row_count > 1000000
+   ```
+   Run one query per table with a UNION ALL across all columns, or use a loop. Also sample 5 rows for visual inspection:
+   ```sql
+   SELECT * FROM <SOURCE_DATABASE>.<schema>.<table> TABLESAMPLE (5 ROWS)
    ```
 
 4. **Check for existing semantic views, tags, or comments** on the tables for additional context.
 
 5. **Identify relationships** across tables by matching column names (e.g., `*_ID` columns that appear in multiple tables).
 
-**Output:** A profiling summary per table: column list, types, approximate cardinality, null rates, candidate keys, foreign key relationships.
+**Output:** A profiling summary per table: column list, types, cardinality, null rates, candidate keys, foreign key relationships, estimated scan cost.
 
-### Step 3: Classify Columns (Facts vs Dimensions)
+### Step 3: Recommend Modeling Pattern
 
-**Goal:** For each source table, determine if it is a fact, dimension, or bridge table, and classify every column.
+**Goal:** Based on profiling results, recommend the right modeling pattern — not every dataset needs a star schema.
 
-**Classification rules:**
+**Decision heuristics:**
+
+| Signal | Recommended Pattern |
+|---|---|
+| 1-2 source tables, no clear grain differences | **OBT (One Big Table)** — single wide denormalized model |
+| 1-3 tables, <100K rows total, simple analytics use case | **Wide denormalized table** — join + flatten in staging |
+| 3+ tables with distinct grains, shared dimensions, >100K rows | **Star schema** — facts + dimensions |
+| User explicitly requests a pattern | **Whatever the user asked for** |
+
+**Present recommendation to user:**
+```
+Based on profiling:
+- [N] source tables, [total rows] total rows
+- [describe key relationships found]
+
+Recommended pattern: [Star Schema / OBT / Wide Table]
+Reason: [explain why]
+
+If Star Schema:
+  Facts: [list with grain]
+  Dimensions: [list with keys and attributes]
+  Measures: [list]
+
+  [Star schema ASCII diagram]
+
+Classification rationale for each column...
+Data quality warnings: [any issues found]
+
+Do you approve this model? (Yes / Modify / Switch to [alternative pattern])
+```
+
+**⚠️ MANDATORY STOPPING POINT**: Do NOT proceed until user approves the pattern and classification.
+
+**Column classification rules (for star schema):**
 
 | Signal | Classification |
 |---|---|
@@ -108,45 +168,23 @@ If the user provided a database/table in their request, extract those values and
 | Free text (long VARCHAR, reviews, descriptions) | **Degenerate dimension** |
 | String-encoded structured data (e.g., `"[2, 3]"`) | **Needs parsing** — note transformation needed |
 
-**For each table, produce:**
-- Table role: fact, dimension, or bridge
-- For facts: grain statement, list of measures, list of FK relationships
-- For dimensions: natural key, list of attributes, SCD type recommendation
-- Star schema ASCII diagram showing relationships
-
-**⚠️ MANDATORY STOPPING POINT**: Present the classification to the user:
-```
-Here is my proposed dimensional model:
-
-[Star schema diagram]
-
-Facts: [list with grain]
-Dimensions: [list with keys and attributes]
-Measures: [list]
-
-Classification rationale for each column...
-
-Data quality warnings: [any issues found]
-
-Do you approve this model? (Yes / Modify)
-```
-
-Do NOT proceed until user approves.
-
 ### Step 4: Generate dbt Project Scaffold
 
-**Goal:** Create a complete dbt project if one doesn't already exist.
+**Goal:** Create a complete dbt project if one doesn't already exist, or integrate into an existing one.
 
 **Actions:**
 
-1. Check if a dbt project already exists at `<PROJECT_PATH>`. If yes, skip scaffold and add models to existing project.
+1. **Detect existing project:** Check if `<PROJECT_PATH>/dbt_project.yml` exists.
+   - **If exists:** Read it. Inspect directory structure (`models/` layout — could be `marts/`, `facts/`, `intermediate/`, etc.). Read existing `sources.yml` if present. Adapt generated models to match existing conventions.
+   - **If not exists:** Create a new scaffold (step 2 below).
 
-2. Create directory structure:
+2. **For new projects**, create directory structure:
    ```
    <PROJECT_PATH>/
    ├── dbt_project.yml
    ├── profiles.yml
    ├── packages.yml
+   ├── .gitignore
    ├── models/
    │   ├── sources.yml
    │   ├── staging/
@@ -159,17 +197,41 @@ Do NOT proceed until user approves.
    - `dimensions/` → `materialized: table`
    - `facts/` → `materialized: table`
 
-4. **profiles.yml**: Configure Snowflake connection using `<WAREHOUSE>`, `<ROLE>`, `<SOURCE_DATABASE>`, `externalbrowser` auth.
+4. **profiles.yml**: Generate from the **active CoCo Snowflake connection**:
+   ```yaml
+   <PROJECT_NAME>:
+     target: dev
+     outputs:
+       dev:
+         type: snowflake
+         account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+         user: "{{ env_var('SNOWFLAKE_USER') }}"
+         authenticator: externalbrowser
+         warehouse: <WAREHOUSE>
+         database: <SOURCE_DATABASE>
+         schema: <TARGET_SCHEMA>
+         role: <ROLE>
+         threads: 4
+   ```
+   Use `env_var()` for account/user — never hardcode credentials. The `externalbrowser` authenticator is the default for local dev; in CI, users should override with `SNOWFLAKE_AUTHENTICATOR=keypair` or similar.
 
-5. **packages.yml**: Include `dbt-labs/dbt_utils` for `generate_surrogate_key`.
+5. **packages.yml**: Include dbt_utils with version pin:
+   ```yaml
+   packages:
+     - package: dbt-labs/dbt_utils
+       version: [">=1.0.0", "<2.0.0"]
+   ```
+   Note: dbt-core 1.9+ includes `dbt.generate_surrogate_key()` natively. If on 1.9+, prefer the built-in over dbt_utils.
 
-6. **sources.yml**: Define all source tables discovered in Step 2.
+6. **sources.yml**: Define all source tables discovered in Step 2. If an existing `sources.yml` exists, **merge** — append new sources without overwriting existing entries. Warn if a source name conflicts.
+
+7. **.gitignore**: Include `target/`, `dbt_packages/`, `logs/`, `.user.yml`, `profiles.yml` (credentials should not be committed).
 
 ### Step 5: Generate Models
 
 **Goal:** Generate SQL models following source-based naming conventions.
 
-**Naming convention:** `stg_<source_table>`, `dim_<entity>`, `fact_<business_process>`
+**Naming convention:** `stg_<source_table>`, `dim_<entity>`, `fact_<business_process>`, `obt_<domain>` (for OBT pattern)
 
 #### 5a: Staging Models (`stg_*.sql`)
 
@@ -182,24 +244,34 @@ One staging model per source table. Each must:
 - Derive useful computed columns (e.g., `LENGTH(text_column)` as `review_length`)
 - Add SQL comments explaining non-obvious transformations
 
-#### 5b: Dimension Models (`dim_*.sql`)
+#### 5b: Dimension Models (`dim_*.sql`) — Star Schema only
 
 One model per identified dimension. Each must:
 - Use `{{ config(materialized='table') }}`
-- Generate surrogate key: `{{ dbt_utils.generate_surrogate_key(['natural_key']) }}`
+- Generate surrogate key: `{{ dbt_utils.generate_surrogate_key(['natural_key']) }}` (or `{{ dbt.generate_surrogate_key(['natural_key']) }}` on dbt 1.9+)
+- Reference staging models via `{{ ref('stg_xxx') }}` — **never raw table names**
 - Select distinct dimension members from staging
 - For Type 1 SCD: use `ROW_NUMBER()` ordered by most recent timestamp to pick latest attribute values
 - Include a `dim_date` model generated as a date spine from `MIN`/`MAX` dates in the data, with attributes: `full_date`, `year`, `quarter`, `month`, `month_name`, `day_of_month`, `day_of_week`, `day_name`, `week_of_year`, `is_weekend`
 
-#### 5c: Fact Models (`fact_*.sql`)
+#### 5c: Fact Models (`fact_*.sql`) — Star Schema only
 
 One model per identified fact table. Each must:
 - Use `{{ config(materialized='table') }}`
 - Generate surrogate key for the fact row
-- Join to all dimension models to resolve surrogate foreign keys
+- Join to all dimension models using `{{ ref('dim_xxx') }}` to resolve surrogate foreign keys — **all inter-model references MUST use `{{ ref() }}`**, never raw table names
 - Include all measures from staging
 - Include degenerate dimensions (long text kept on fact, not in a dim)
 - Add SQL comments explaining why each column is classified as measure vs degenerate dimension
+
+#### 5d: OBT Model (`obt_*.sql`) — OBT pattern only
+
+Single wide model that:
+- Joins all staging models via `{{ ref('stg_xxx') }}`
+- Flattens all columns into one wide table
+- Uses `{{ config(materialized='table') }}`
+- Includes all measures and dimension attributes inline
+- Adds surrogate key for the primary grain
 
 ### Step 6: Generate Schema Tests & Docs
 
@@ -218,27 +290,35 @@ For every model, create a `schema.yml` with:
 
 **Actions:**
 
-1. Install packages:
+1. **Detect dbt runner** — use the first available:
+   ```
+   uv run --with 'dbt-snowflake>=1.7,<2.0'  →  preferred
+   pipx run --spec 'dbt-snowflake>=1.7,<2.0' dbt  →  fallback
+   dbt (if globally installed and version ≥1.7)  →  last resort
+   ```
+   Verify version: `dbt --version` must show ≥1.7.
+
+2. Install packages:
    ```bash
-   uv run --with dbt-snowflake dbt deps --profiles-dir <PROJECT_PATH>
+   <runner> dbt deps --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
    ```
 
-2. Parse/compile the project:
+3. Parse/compile the project:
    ```bash
-   uv run --with dbt-snowflake dbt parse --profiles-dir <PROJECT_PATH>
+   <runner> dbt parse --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
    ```
 
-3. **If parse fails:** Fix errors and retry (max 3 attempts).
+4. **If parse fails:** Fix errors and retry (max 3 attempts).
 
-4. Report results:
+5. Report results:
    ```
    ✅ dbt parse: X models, Y tests, Z sources — 0 errors
    ```
 
-5. **If Snowflake connection is available**, also run:
+6. **If Snowflake connection is available**, also run:
    ```bash
-   uv run --with dbt-snowflake dbt run --profiles-dir <PROJECT_PATH>
-   uv run --with dbt-snowflake dbt test --profiles-dir <PROJECT_PATH>
+   <runner> dbt run --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
+   <runner> dbt test --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
    ```
 
 **⚠️ MANDATORY STOPPING POINT**: Present all generated models to the user for review before proceeding to Git/PR.
@@ -249,21 +329,26 @@ For every model, create a `schema.yml` with:
 
 **Actions:**
 
-1. **Initialize git** if not already a repo (`git init`), add `.gitignore` (exclude `target/`, `dbt_packages/`, `logs/`, `.user.yml`).
+1. **Detect git state:**
+   - If `<PROJECT_PATH>/.git` exists: it's already a repo. Run `git status` to check for conflicts or uncommitted changes.
+   - If no `.git`: run `git init`.
+   - Check if remote `origin` exists (`git remote get-url origin`). Only add if missing:
+     ```bash
+     git remote add origin https://github.com/<GITHUB_REPO>.git
+     ```
+   - If remote exists but points to a different repo, warn the user and ask before changing it.
 
-2. **Ensure remote is set** to `<GITHUB_REPO>`:
-   ```bash
-   git remote add origin https://github.com/<GITHUB_REPO>.git
-   ```
+2. **Create `.gitignore`** if it doesn't exist (exclude `target/`, `dbt_packages/`, `logs/`, `.user.yml`, `profiles.yml`).
 
 3. **Create feature branch** per source table:
    - Branch name: `feature/dim-model-<source_table_lowercase>`
+   - If branch already exists, append a timestamp suffix.
 
 4. **Commit** with descriptive message listing all models, measures, and dimensions.
 
 5. **Push** branch and **create PR** via `gh pr create` with body containing:
    - Summary of models generated
-   - Star schema ASCII diagram
+   - Star schema ASCII diagram (or OBT column list)
    - Data profiling stats (row counts, cardinality)
    - Classification rationale (why each column was assigned its role)
    - Data quality warnings found during profiling
@@ -272,15 +357,15 @@ For every model, create a `schema.yml` with:
 **PR body template:**
 ```markdown
 ## Summary
-- AI-generated star schema from `<SOURCE_DATABASE>.<SOURCE_SCHEMA>.<SOURCE_TABLE>`
+- AI-generated [star schema / OBT / wide table] from `<SOURCE_DATABASE>.<SOURCE_SCHEMA>.<SOURCE_TABLE>`
 - [N] staging models, [N] dimensions, [N] fact tables, [N] schema tests
 
-## Star Schema
-[ASCII diagram]
+## Model Diagram
+[ASCII diagram or column list]
 
 ## Data Profiling
-| Table | Rows | Columns | Candidate Keys |
-|---|---|---|---|
+| Table | Rows | Columns | Null % (max) | Candidate Keys |
+|---|---|---|---|---|
 
 ## Column Classification Rationale
 | Column | Classification | Reason |
@@ -299,13 +384,13 @@ For every model, create a `schema.yml` with:
 
 ## Stopping Points
 
-- ✋ Step 3: User approves fact/dimension classification and star schema design
+- ✋ Step 3: User approves modeling pattern, fact/dimension classification, and schema design
 - ✋ Step 7: User reviews generated models before Git operations
 - ✋ Step 8: PR created — link presented to user
 
 ## Output
 
-- Complete dbt project with staging, dimension, and fact models
+- Complete dbt project with staging + dimension + fact models (or OBT)
 - `schema.yml` files with tests and column documentation
 - GitHub PR on a feature branch ready for engineer review
 
@@ -314,7 +399,10 @@ For every model, create a `schema.yml` with:
 | Issue | Solution |
 |---|---|
 | `dbt parse` fails | Check column name quoting — mixed-case columns from Iceberg/Parquet need double quotes (e.g., `"reviewText"`) |
-| Snowflake connection fails during `dbt compile` | Use `dbt parse` for offline validation; connection only needed for `dbt run` |
+| Snowflake connection fails during `dbt run` | Verify `profiles.yml` auth. Use `dbt parse` for offline validation; connection only needed for `dbt run` |
 | `gh pr create` permission denied | Token needs `Contents (R&W)` and `Pull requests (R&W)` fine-grained permissions |
 | String-encoded data (e.g., `"[2, 3]"`) | Use `TRY_CAST` + `REGEXP_SUBSTR` in staging model for safe parsing |
-| `HELPFUL`-style array strings | Parse with `regexp_substr(col, '\\d+', 1, 1)` and `regexp_substr(col, '\\d+', 1, 2)` |
+| `uv` not installed | Fall back to `pipx run --spec 'dbt-snowflake>=1.7' dbt` or global `dbt` |
+| Existing project has different directory layout | Read `dbt_project.yml` to detect `model-paths` and folder conventions; adapt accordingly |
+| Profiling is slow on large tables | Add `SAMPLE (100000 ROWS)` clause; use XSMALL warehouse for profiling |
+| Remote already configured to different repo | Warn user; don't silently overwrite. Ask before changing `origin` |
