@@ -132,6 +132,26 @@ Summarize what you extracted:
 
 **STOP** — Wait for the user to confirm before proceeding.
 
+### 1f. Proactive research pass
+
+After the user confirms the demo spec, front-load knowledge gathering before asking about data or environment. This prevents mid-build surprises.
+
+1. **Check for bundled CoCo skills** — For each feature in the workflow, check if a bundled skill exists. If so, invoke it to get current syntax and patterns.
+   - Dynamic Tables → `dynamic-tables` skill
+   - Cortex Agents → `cortex-agent` skill
+   - Iceberg → `iceberg` skill
+   - Semantic Views → `semantic-view` skill
+   - Streamlit → `developing-with-streamlit` skill
+   - ML / model registry → `machine-learning` skill
+
+2. **Fetch current docs** — For each feature involved, `web_fetch` the relevant docs.snowflake.com page. Guides and blogs may have stale syntax.
+
+3. **Check known gotchas** — See `references/KNOWN_GOTCHAS.md` for feature-specific traps. Flag any that apply to this workflow.
+
+4. **Cross-reference source against docs** — If the input was a blog, social post, or older guide, compare the code it uses against what the docs say. Note any discrepancies to fix during the build.
+
+This step runs silently or with a brief "Let me check the latest docs for these features..." — don't make the user wait through a research monologue.
+
 ---
 
 ## Phase 2: Data & Environment
@@ -161,7 +181,7 @@ SELECT * FROM <candidate> LIMIT 5;
 
 Present top 3-5 candidates. Build column mapping. Ask for confirmation.
 
-See `references/TEACHING_PATTERNS.md` for full discovery patterns.
+See `references/ACCOUNT_DISCOVERY.md` for full discovery patterns.
 
 ### 2c. Synthetic data (if chosen)
 
@@ -191,7 +211,7 @@ SHOW DATABASES;
 SHOW GRANTS TO USER IDENTIFIER(CURRENT_USER());
 ```
 
-See `references/TEACHING_PATTERNS.md` for full discovery patterns.
+See `references/ACCOUNT_DISCOVERY.md` for full discovery patterns.
 
 **Synthetic data + own database guard:** If the user chose synthetic data (2c) AND then picks "My own database" or any non-sandbox environment, confirm before proceeding: "Just to confirm — I'll create synthetic tables in your [database] database. That OK, or would you rather use a sandbox?" This prevents accidentally cluttering a production database with fake tables.
 
@@ -266,11 +286,20 @@ Don't waste the user's time staring at a spinner. Use wait time to add value.
 
 When you need to look something up during the build, check in this order:
 
-1. **Bundled CoCo skills** — check if there's a skill for the feature (dynamic-tables, cortex-agent, iceberg, etc.)
+1. **Bundled CoCo skills** — If the feature has a bundled skill, **invoke it**. Don't just check — actually load it for current syntax and patterns:
+   - Dynamic Tables → invoke `dynamic-tables`
+   - Cortex Agents → invoke `cortex-agent`
+   - Iceberg → invoke `iceberg`
+   - Semantic Views → invoke `semantic-view`
+   - Streamlit → invoke `developing-with-streamlit`
+   - ML / model registry → invoke `machine-learning`
+   - Data governance / masking → invoke `data-governance`
+   - Cost questions → invoke `cost-intelligence`
 2. **Other installed skills** — user's custom skills may have relevant patterns
-3. **Snowflake docs** — `web_fetch` from docs.snowflake.com for current syntax and parameters
-4. **Quickstart guides** — cross-reference official guides
-5. **Everything else** — blogs, posts, READMEs, etc.
+3. **Known gotchas** — check `references/KNOWN_GOTCHAS.md` for the feature
+4. **Snowflake docs** — `web_fetch` from docs.snowflake.com for current syntax and parameters
+5. **Quickstart guides** — cross-reference official guides
+6. **Everything else** — blogs, posts, READMEs, etc.
 
 Use your judgement. The user's input source (blog, post, etc.) is great for understanding what they want to build. For how to build it, prefer the sources higher up this list.
 
@@ -322,7 +351,28 @@ If the user comes back after a session died mid-build (context limit, network dr
 
 ### 4a. Verification
 
-Run verification queries. Confirm the POC works end-to-end. Keep it brief.
+Run a structured verification before declaring the POC complete:
+
+1. **Data validation** — Row counts match expectations. No unexpected nulls. Sample output looks correct.
+   ```sql
+   SELECT COUNT(*) FROM <output_table>;
+   SELECT * FROM <output_table> LIMIT 5;
+   ```
+2. **Pipeline validation** — If the POC includes tasks, streams, or pipes, verify they work:
+   ```sql
+   -- Check task ran successfully
+   SELECT * FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY()) WHERE NAME = '<task>' ORDER BY SCHEDULED_TIME DESC LIMIT 3;
+   -- Check stream has data
+   SELECT SYSTEM$STREAM_GET_TABLE_TIMESTAMP('<stream>');
+   ```
+3. **End-to-end trace** — Pick one record from the source and trace it through every step to the final output. Show the user the path.
+4. **Permission check** — Confirm everything runs under the user's current role. No leftover ACCOUNTADMIN or SYSADMIN usage.
+   ```sql
+   SELECT CURRENT_ROLE();  -- Should be user's working role, not elevated
+   ```
+5. **Idempotency check** — Can you re-run the POC without breaking it? If not, note what needs manual cleanup between runs.
+
+Keep each check to 1-2 queries. Show results, flag anything unexpected, move on.
 
 ### 4b. Generate Artifacts
 
@@ -345,6 +395,17 @@ Run verification queries. Confirm the POC works end-to-end. Keep it brief.
 - [Feature 1]: [role in the workflow]
 - [Feature 2]: [role in the workflow]
 
+## Architecture
+[source] → [ingestion] → [transform] → [output]
+-- ASCII diagram showing how the pieces connect.
+-- Keep it simple: boxes and arrows, not a 50-line diagram.
+
+## Prerequisites & Permissions
+- **Role:** [role used] — needs [specific privileges]
+- **Warehouse:** [warehouse] — [size, DDL-capable]
+- **External access:** [any external stages, APIs, packages]
+-- Include everything someone else would need to reproduce this from scratch.
+
 ## What was built
 - [Object type] [fully.qualified.name]: [purpose]
 - [Object type] [fully.qualified.name]: [purpose]
@@ -362,6 +423,12 @@ DROP VIEW IF EXISTS [db.schema.view];
 DROP STAGE IF EXISTS [db.schema.stage];
 DROP SCHEMA IF EXISTS [db.schema];
 -- Only include warehouse/role drops if the POC created them
+
+## Scaling Notes
+-- One paragraph. What would change for production?
+-- Consider: warehouse sizing, clustering keys, partition pruning, task frequency, data volume.
+-- Example: "This POC used 28K rows on XS warehouse. For production volumes (10M+ rows),
+-- consider clustering on READING_TS, scaling to MEDIUM warehouse, and tightening task schedule."
 ```
 
 Save to: `~/Documents/devrel/outputs/poc-[workflow-slug]-summary.md`
@@ -407,4 +474,7 @@ Use `ask_user_question`:
 
 ## Reference Materials
 
-- `references/TEACHING_PATTERNS.md` — Account discovery SQL, guide parsing heuristics, column mapping patterns, environment setup, error recovery
+- `references/TEACHING_PATTERNS.md` — Column mapping, environment setup, adaptation hints, common errors
+- `references/ACCOUNT_DISCOVERY.md` — Table search, role checking, warehouse finding, topic-only search queries
+- `references/GUIDE_PARSING.md` — sfquickstarts format, step extraction, data requirements extraction
+- `references/KNOWN_GOTCHAS.md` — Feature-specific traps and workarounds (Dynamic Tables, Cortex Agents, Snowpipe Streaming, Iceberg, Tasks/Streams, etc.)
