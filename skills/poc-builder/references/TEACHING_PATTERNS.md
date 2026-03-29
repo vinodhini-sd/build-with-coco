@@ -66,7 +66,11 @@ USE SCHEMA <workflow>_lab;
 
 **If not (fallback):**
 ```sql
-USE WAREHOUSE COMPUTE_WH;
+-- Use the current warehouse if it supports DDL. If not, find one that does.
+-- Don't assume COMPUTE_WH exists — it's default in trial accounts but rare in enterprise.
+SELECT CURRENT_WAREHOUSE();
+SHOW WAREHOUSES;
+-- Pick a DDL-capable warehouse from the list, or ask the user which one to use.
 CREATE DATABASE IF NOT EXISTS <workflow>_lab;
 USE DATABASE <workflow>_lab;
 CREATE SCHEMA IF NOT EXISTS <workflow>_lab;
