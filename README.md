@@ -13,18 +13,20 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 
 ## Prompts
 
-Copy-paste prompts organized by **what you're trying to accomplish**. Browse the full catalog in [`prompts/README.md`](prompts/README.md).
+Copy-paste prompts in two categories — browse by role or by scenario. Full catalog in [`prompts/README.md`](prompts/README.md).
 
-| Job to be Done | Prompts |
+**By role** (`prompts/roles/`): [data-engineer](prompts/roles/data-engineer/prompts.md), [analytics-engineer](prompts/roles/analytics-engineer/prompts.md), [data-analyst](prompts/roles/data-analyst/prompts.md), [ai-ml-engineer](prompts/roles/ai-ml-engineer/prompts.md), [app-developer](prompts/roles/app-developer/prompts.md), [data-governance-lead](prompts/roles/data-governance-lead/prompts.md), [snowflake-admin](prompts/roles/snowflake-admin/prompts.md)
+
+| Scenario | Prompts |
 |---|---|
-| **Connect sources** | [openflow-postgres-replication](prompts/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](prompts/connect-sources/iceberg-external-catalog.md) |
-| **Build pipelines** | [dbt-health-check-and-deploy](prompts/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](prompts/build-pipelines/dynamic-table-pipeline.md) |
-| **Monitor quality** | [data-quality-monitoring](prompts/monitor-quality/data-quality-monitoring.md) |
-| **Optimize costs** | [full-cost-governance-audit](prompts/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](prompts/optimize-costs/cost-optimization-sprint.md) |
-| **Secure & govern** | [governance-hardening](prompts/secure-and-govern/governance-hardening.md), [network-security-lockdown](prompts/secure-and-govern/network-security-lockdown.md) |
-| **Assess change impact** | [lineage-impact-analysis](prompts/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](prompts/assess-change-impact/migration-assessment.md) |
-| **Self-serve analytics** | [semantic-view-plus-agent](prompts/self-serve-analytics/semantic-view-plus-agent.md), [streamlit-sales-dashboard](prompts/self-serve-analytics/streamlit-sales-dashboard.md) |
-| **AI enrichment** | [cortex-ai-ticket-enrichment](prompts/ai-enrichment/cortex-ai-ticket-enrichment.md), [ml-churn-prediction](prompts/ai-enrichment/ml-churn-prediction.md) |
+| **Connect sources** | [openflow-postgres-replication](prompts/scenarios/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](prompts/scenarios/connect-sources/iceberg-external-catalog.md) |
+| **Build pipelines** | [dbt-health-check-and-deploy](prompts/scenarios/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](prompts/scenarios/build-pipelines/dynamic-table-pipeline.md) |
+| **Monitor quality** | [data-quality-monitoring](prompts/scenarios/monitor-quality/data-quality-monitoring.md) |
+| **Optimize costs** | [full-cost-governance-audit](prompts/scenarios/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](prompts/scenarios/optimize-costs/cost-optimization-sprint.md) |
+| **Secure & govern** | [governance-hardening](prompts/scenarios/secure-and-govern/governance-hardening.md), [network-security-lockdown](prompts/scenarios/secure-and-govern/network-security-lockdown.md) |
+| **Assess change impact** | [lineage-impact-analysis](prompts/scenarios/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](prompts/scenarios/assess-change-impact/migration-assessment.md) |
+| **Self-serve analytics** | [semantic-view-plus-agent](prompts/scenarios/self-serve-analytics/semantic-view-plus-agent.md), [streamlit-sales-dashboard](prompts/scenarios/self-serve-analytics/streamlit-sales-dashboard.md) |
+| **AI enrichment** | [cortex-ai-ticket-enrichment](prompts/scenarios/ai-enrichment/cortex-ai-ticket-enrichment.md), [ml-churn-prediction](prompts/scenarios/ai-enrichment/ml-churn-prediction.md) |
 
 ## What Are Cortex Code Skills?
 
