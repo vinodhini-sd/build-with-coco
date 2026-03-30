@@ -1,6 +1,6 @@
-# coco-skills-library
+# build-with-coco
 
-A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code) skills for automating data engineering workflows on Snowflake.
+A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code) skills and copy-paste prompts for automating data engineering workflows on Snowflake.
 
 ## Skills
 
@@ -11,27 +11,52 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 | [know-your-data](skills/know-your-data/SKILL.md) | Discover data you already have access to in a Snowflake account, understand what it contains, and map it to your roles | "know your data", "know my data", "find data", "data discovery", "what can I access", "explore account" |
 | [poc-builder](skills/poc-builder/SKILL.md) | Go from zero to a working POC with any Snowflake guide, blog post, doc link, or topic name. Deep-dives the content, extracts a demo spec, finds matching data in your account, and builds a working POC interactively | "poc builder", "build this", "zero to poc", "try this", "teach me", "walk me through", "prototype this", "run this guide" |
 
+## Prompts
+
+Copy-paste prompts organized by **what you're trying to accomplish**. Browse the full catalog in [`prompts/README.md`](prompts/README.md).
+
+| Job to be Done | Prompts |
+|---|---|
+| **Connect sources** | [openflow-postgres-replication](prompts/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](prompts/connect-sources/iceberg-external-catalog.md) |
+| **Build pipelines** | [dbt-health-check-and-deploy](prompts/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](prompts/build-pipelines/dynamic-table-pipeline.md) |
+| **Monitor quality** | [data-quality-monitoring](prompts/monitor-quality/data-quality-monitoring.md) |
+| **Optimize costs** | [full-cost-governance-audit](prompts/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](prompts/optimize-costs/cost-optimization-sprint.md) |
+| **Secure & govern** | [governance-hardening](prompts/secure-and-govern/governance-hardening.md), [network-security-lockdown](prompts/secure-and-govern/network-security-lockdown.md) |
+| **Assess change impact** | [lineage-impact-analysis](prompts/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](prompts/assess-change-impact/migration-assessment.md) |
+| **Self-serve analytics** | [semantic-view-plus-agent](prompts/self-serve-analytics/semantic-view-plus-agent.md), [streamlit-sales-dashboard](prompts/self-serve-analytics/streamlit-sales-dashboard.md) |
+| **AI enrichment** | [cortex-ai-ticket-enrichment](prompts/ai-enrichment/cortex-ai-ticket-enrichment.md), [ml-churn-prediction](prompts/ai-enrichment/ml-churn-prediction.md) |
+
 ## What Are Cortex Code Skills?
 
 Skills are markdown-based workflow definitions that teach Cortex Code how to perform complex, multi-step tasks. They provide structured guidance, tool references, decision logic, and user checkpoints.
 
 ## Installation
 
-### Global (all projects)
+### Quick install (everything)
 
-Copy a skill directory into your global skills folder:
+```bash
+./install.sh
+```
+
+### Skills only or prompts only
+
+```bash
+./install.sh skills    # skills only
+./install.sh prompts   # prompts only
+```
+
+### Per-project install
+
+```bash
+./install.sh --project   # installs into .cortex/ in current directory
+```
+
+### Manual
+
+Copy a skill or prompt directory into your global folder:
 
 ```bash
 cp -r skills/dbt-model-generator ~/.snowflake/cortex/skills/dbt-model-generator
-```
-
-### Per-project
-
-Copy into your project's `.cortex/skills/` directory:
-
-```bash
-mkdir -p .cortex/skills
-cp -r skills/dbt-model-generator .cortex/skills/dbt-model-generator
 ```
 
 ## Usage
@@ -43,6 +68,8 @@ $dbt-model-generator
 ```
 
 Or simply describe what you need — Cortex Code will match your request to the right skill based on trigger phrases.
+
+For prompts, just paste them directly into Cortex Code CLI. See each prompt file for the copy-paste block and customization tips.
 
 ## dbt-model-generator
 
