@@ -5,12 +5,10 @@
 ## The Prompt
 
 ```
-Harden the governance posture of my PROD database:
-1. Run sensitive data classification on all tables in PROD.CORE
-2. For any columns classified as PII, create and apply masking policies
-3. Set up row access policies on FACT_SALES so the ANALYST role can only see their region
-4. Generate a governance maturity score and show me what's still missing
-Use the data-governance skill and do each step sequentially — verify before moving on.
+Harden the governance posture of {{database.schema}}: classify all tables for sensitive
+data, apply masking policies to any PII columns you find, and set up row access policies
+for role-based filtering. Then generate a governance maturity score and show me what's
+still missing. Do each step sequentially and verify before moving on.
 ```
 
 ## What This Triggers

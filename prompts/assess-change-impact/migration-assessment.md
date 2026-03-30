@@ -5,10 +5,10 @@
 ## The Prompt
 
 ```
-I'm migrating from Teradata to Snowflake. I have 50 SQL scripts in ~/migration/teradata_sql/.
-Run a SnowConvert assessment on them — categorize by conversion complexity (auto, semi-auto,
-manual), flag any Teradata-specific syntax that needs rewriting, and estimate the overall
-migration effort. Generate a summary report.
+I'm migrating SQL workloads from {{source-platform}} to Snowflake. My SQL scripts are in
+{{sql-directory}}. Run a SnowConvert assessment — categorize by conversion complexity
+(auto, semi-auto, manual), flag any dialect-specific syntax that needs rewriting, and
+generate a summary report with estimated migration effort.
 ```
 
 ## What This Triggers

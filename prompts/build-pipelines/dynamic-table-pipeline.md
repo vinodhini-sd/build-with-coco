@@ -5,13 +5,10 @@
 ## The Prompt
 
 ```
-I have a raw table ANALYTICS.RAW.EVENTS with columns EVENT_ID, USER_ID, EVENT_TYPE,
-EVENT_DATA (variant), CREATED_AT. Build me a dynamic table pipeline:
-- DT_EVENTS_PARSED: flatten EVENT_DATA into typed columns
-- DT_USER_SESSIONS: sessionize events per user (30-min gap)
-- DT_DAILY_METRICS: daily aggregate of sessions, events, unique users
-Set target lag to 1 minute for parsed, 5 minutes for sessions, downstream for metrics.
-Verify each DT refreshes successfully before creating the next one.
+Build a multi-layer dynamic table pipeline on top of my raw events table. Ask me for the
+source table and schema, then create a parsing layer, a sessionization layer, and a daily
+aggregation layer with appropriate target lags. Verify each layer refreshes successfully
+before building the next one.
 ```
 
 ## What This Triggers

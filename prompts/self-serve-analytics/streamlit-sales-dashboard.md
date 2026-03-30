@@ -5,13 +5,9 @@
 ## The Prompt
 
 ```
-Build me a Streamlit in Snowflake app for our sales team. It should have:
-- A KPI header row (total revenue, deal count, avg deal size, win rate)
-- A bar chart of revenue by region
-- A line chart of monthly revenue trend
-- Filters for date range, region, and product category
-Use PROD.ANALYTICS.FACT_SALES as the data source. Make it look polished with proper
-formatting and a clean layout.
+Build a Streamlit in Snowflake dashboard for my {{use-case}} data. Ask me for the source
+table and which KPIs, dimensions, and filters to include, then build a polished app with
+metric cards and charts and deploy it.
 ```
 
 ## What This Triggers

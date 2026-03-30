@@ -5,10 +5,9 @@
 ## The Prompt
 
 ```
-I have a dbt project at ~/my_dbt_project. Spin up a team to: (1) validate the project
-compiles cleanly, (2) check test coverage across all models, (3) list any models that
-reference sources with stale data, (4) deploy the project to Snowflake using snow dbt deploy.
-Summarize findings before deploying.
+Run a full health check on my dbt project at {{project-path}}: check it compiles cleanly,
+review test coverage across all models, and flag any models with stale sources. Then deploy
+to Snowflake using snow dbt deploy. Summarize findings before deploying.
 ```
 
 ## What This Triggers

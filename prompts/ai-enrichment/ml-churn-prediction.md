@@ -5,13 +5,10 @@
 ## The Prompt
 
 ```
-Build a customer churn prediction model using Snowflake ML:
-1. Use PROD.ANALYTICS.CUSTOMER_FEATURES as training data (columns: tenure_months,
-   monthly_spend, support_tickets_90d, login_frequency, contract_type, churned)
-2. Train an XGBoost classifier, tune hyperparameters, and log to the Model Registry
-3. Deploy the best model as a model service endpoint
-4. Run batch inference on PROD.ANALYTICS.ACTIVE_CUSTOMERS and save predictions
-Show me the feature importance and model metrics (AUC, precision, recall).
+Build an end-to-end churn prediction model using Snowflake ML. Ask me for my feature
+table and which column is the target label, then train an XGBoost classifier, tune
+hyperparameters, and log the best model to the Model Registry. Run batch inference on
+my active customers and show me feature importance and model metrics.
 ```
 
 ## What This Triggers

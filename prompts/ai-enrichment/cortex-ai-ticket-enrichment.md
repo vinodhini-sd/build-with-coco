@@ -5,14 +5,10 @@
 ## The Prompt
 
 ```
-I have a support ticket table at PROD.SUPPORT.RAW_TICKETS with columns (ticket_id,
-subject, body, created_at). Use Cortex AI functions to:
-1. Classify each ticket into categories (billing, bug, feature_request, how_to, outage)
-2. Extract key entities (product_name, error_code, customer_tier)
-3. Score sentiment (-1 to 1)
-4. Summarize each ticket into a one-liner
-Create a Dynamic Table that materializes all enrichments so they stay current as new
-tickets arrive.
+Use Cortex AI functions to enrich the text data in {{database.schema.table}}. Ask me
+which column contains the text and what categories or entities to extract, then classify,
+extract entities, score sentiment, and summarize each row. Materialize the results as a
+Dynamic Table so enrichments stay current as new data arrives.
 ```
 
 ## What This Triggers

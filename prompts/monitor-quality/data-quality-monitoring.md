@@ -5,10 +5,9 @@
 ## The Prompt
 
 ```
-Set up data quality monitoring on PROD.CORE.FACT_SALES using Snowflake Data Metric Functions.
-Add checks for: row count anomalies (compare to 7-day avg), NULL rates on REVENUE and
-CUSTOMER_ID columns, freshness (alert if no new rows in 2 hours), and duplicate detection
-on TRANSACTION_ID. Show me the DMF definitions and how to query results.
+Set up automated data quality monitoring on {{database.schema.table}} using Snowflake Data
+Metric Functions. Ask me which columns matter most, then add monitors for row count anomalies,
+NULL rates, freshness, and duplicates. Show me the DMF definitions and how to query the results.
 ```
 
 ## What This Triggers

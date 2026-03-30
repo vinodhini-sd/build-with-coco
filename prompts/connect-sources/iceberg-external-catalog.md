@@ -5,10 +5,10 @@
 ## The Prompt
 
 ```
-Set up Apache Iceberg tables in Snowflake that read from my existing data lake on S3.
-I have Parquet files at s3://my-bucket/data/events/ managed by an AWS Glue catalog.
-Create the external volume, catalog integration, and Iceberg tables. Verify I can query
-the data and that auto-refresh is working. Ask me for the IAM role ARN and bucket details.
+Set up Iceberg tables in Snowflake to query my existing data lake on {{cloud-storage-provider}}.
+Ask me for the storage path, IAM role or access credentials, and catalog type (e.g. AWS Glue,
+Unity Catalog), then create the external volume, catalog integration, and Iceberg tables.
+Verify I can query the data and that auto-refresh is working.
 ```
 
 ## What This Triggers

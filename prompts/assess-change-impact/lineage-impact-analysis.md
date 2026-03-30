@@ -5,10 +5,9 @@
 ## The Prompt
 
 ```
-I need to change the column CUSTOMER_ID in PROD.CORE.DIM_CUSTOMERS from NUMBER to VARCHAR.
-Before I do anything, trace all downstream dependencies — dynamic tables, views, dashboards,
-Streamlit apps, anything that reads from this table. Tell me exactly what would break and
-give me a migration plan. Use the lineage skill.
+Before I make a breaking schema change to {{database.schema.table}}, trace all downstream
+dependencies — dynamic tables, views, dashboards, and apps that read from it. Tell me
+exactly what would break and give me a migration plan. Don't make any changes yet.
 ```
 
 ## What This Triggers

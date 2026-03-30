@@ -5,10 +5,9 @@
 ## The Prompt
 
 ```
-I need to replicate data from a Postgres database into Snowflake using OpenFlow. The source
-has tables: users, orders, products, order_items. Set up the connector with CDC enabled,
-configure the destination schema as RAW.ECOMMERCE, and verify the initial load completes.
-Walk me through each step and ask me for connection details when needed.
+Help me replicate tables from a Postgres database into Snowflake using OpenFlow with CDC
+enabled. Ask me for the source connection details, which tables to replicate, and the
+destination schema. Walk me through the setup and verify the initial load completes.
 ```
 
 ## What This Triggers

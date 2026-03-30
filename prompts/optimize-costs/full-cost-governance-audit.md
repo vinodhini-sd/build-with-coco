@@ -5,10 +5,10 @@
 ## The Prompt
 
 ```
-Run a full audit of my Snowflake account: (1) find my top 10 most expensive warehouses
-by credit consumption this month, (2) check which tables have no masking or row access
-policies applied, (3) identify any tables with PII columns that aren't classified yet.
-Spawn parallel agents for each workstream and give me a combined summary at the end.
+Run a full audit of my Snowflake account: find my top 10 most expensive warehouses by
+credit consumption this month, check which tables have no masking or row access policies
+applied, and identify any tables with unclassified PII columns. Spawn parallel agents for
+each workstream and give me a combined summary at the end.
 ```
 
 ## What This Triggers

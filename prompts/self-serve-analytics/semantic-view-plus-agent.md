@@ -5,11 +5,9 @@
 ## The Prompt
 
 ```
-I want business users to query our sales data without writing SQL. Set up a semantic view
-on PROD.ANALYTICS.FACT_SALES with dimensions (region, product_category, sales_rep) and
-measures (revenue, quantity, discount_pct). Then create a Cortex Agent that uses this
-semantic view so people can ask things like "what were total sales in APAC last quarter?"
-Test it with 5 sample questions.
+I want business users to query my data using plain English, no SQL. Ask me which table
+to use and which dimensions and measures matter most, then create a semantic view and wire
+a Cortex Agent to it. Test it with a few sample questions to verify it works.
 ```
 
 ## What This Triggers
