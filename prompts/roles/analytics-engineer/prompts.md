@@ -24,8 +24,11 @@ Include verified queries.
 ## 3. Trace what breaks if I rename a column
 
 ```
-I need to rename {{table}}.{{column}} to a new name. Trace all downstream dbt
-models, views, and apps that reference this column. Give me a migration checklist.
+I need to rename {{table}}.{{column}} to a new name. Trace all downstream
+Snowflake-native objects (views, dynamic tables, tasks) that reference this column,
+and check my dbt project files for references too. Give me a migration checklist.
+Note: Snowflake lineage covers native objects only — dbt model tracing comes from
+searching the project source files, not OBJECT_DEPENDENCIES.
 ```
 
 ## 4. Generate dbt models from raw tables

@@ -30,6 +30,6 @@ step sequentially and verify before moving on.
 
 ## Tips
 
-- Replace `PROD.CORE` and `FACT_SALES` with your actual schema/tables
-- Change "ANALYST role can only see their region" to your access pattern
+- Replace `{{database.schema}}` with your actual target schema
 - Add "also create tag-based masking for all EMAIL columns" for broader coverage
+- Add "skip row access policies for now" if you only need classification and masking first

@@ -6,8 +6,9 @@
 
 ```
 Before I make a breaking schema change to {{database.schema.table}}, trace all downstream
-dependencies — dynamic tables, views, dashboards, and apps that read from it. Tell me
-exactly what would break and give me a migration plan. Don't make any changes yet.
+Snowflake-native dependencies — dynamic tables, views, tasks, pipes, and apps that read
+from it. Tell me exactly what would break and give me a migration plan. Don't make any
+changes yet.
 ```
 
 ## What This Triggers

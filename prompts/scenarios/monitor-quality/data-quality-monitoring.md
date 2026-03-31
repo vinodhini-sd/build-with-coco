@@ -5,8 +5,8 @@
 ## The Prompt
 
 ```
-Set up automated data quality monitoring on {{database.schema.table}} using Snowflake Data
-Metric Functions. Ask me which columns matter most and whether I want checks to run on a
+Set up automated data quality monitoring on {{database}}.{{schema}}.{{table}} using Snowflake
+Data Metric Functions. Ask me which columns matter most and whether I want checks to run on a
 cron schedule or trigger on DML events, then add monitors for row count anomalies,
 NULL rates, freshness, and duplicates. Show me the DMF definitions and how to query the results.
 ```
