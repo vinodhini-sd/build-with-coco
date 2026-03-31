@@ -75,7 +75,7 @@ Don't just extract a feature name. Build a **complete demo spec**:
 2. **Features involved** — List ALL Snowflake features used in the workflow (e.g., Snowpipe Streaming V2 + Streamlit + Tasks)
 3. **End-to-end flow** — The full pipeline: what goes in, what transformations happen, what comes out
 4. **Architecture** — How the pieces connect (data source → ingestion → storage → transformation → presentation)
-5. **Prerequisites** — Roles, warehouses, external tools, Python packages, network access (external access integrations, network rules, secrets for API keys)
+5. **Prerequisites** — Roles, warehouses, external tools, Python packages, network access (external access integrations, network rules, secrets for API keys). Flag any mention of ACCOUNTADMIN or SYSADMIN — these will be evaluated in step 1f before the build starts.
 6. **Steps** — Discrete, numbered steps. Each: action, SQL/code, why it matters
 7. **Key concepts** — 3-5 core ideas
 8. **Data requirements** — Column names, types, volume, shape
@@ -150,7 +150,47 @@ After the user confirms the demo spec, front-load knowledge gathering before ask
 
 4. **Cross-reference source against docs** — If the input was a blog, social post, or older guide, compare the code it uses against what the docs say. Note any discrepancies to fix during the build.
 
-This step runs silently or with a brief "Let me check the latest docs for these features..." — don't make the user wait through a research monologue.
+5. **Evaluate role prerequisites** — If the guide lists ACCOUNTADMIN or SYSADMIN as a prerequisite, don't take it at face value. Guides routinely use ACCOUNTADMIN as a catch-all because it always works — not because it's the minimum required.
+
+   **Step 1 — Check what the operations actually need.**
+   For each SQL command in the guide that requires elevated privileges (CREATE DATABASE, ALTER ACCOUNT, GRANT ROLE, CREATE NETWORK RULE, etc.), `web_fetch` the relevant Snowflake docs page and find the exact privilege required. Some operations genuinely need ACCOUNTADMIN; most don't.
+
+   As a reference, these operations *do* require ACCOUNTADMIN:
+   - `CREATE NETWORK RULE`, `CREATE EXTERNAL ACCESS INTEGRATION`
+   - `ALTER ACCOUNT SET ...` (account-level parameters)
+   - Trust Center, Tri-Secret Secure, account replication
+   - Granting ACCOUNTADMIN itself
+
+   These typically do **not** require ACCOUNTADMIN (SYSADMIN or specific grants suffice):
+   - `CREATE DATABASE`, `CREATE SCHEMA`, `CREATE TABLE`, `CREATE WAREHOUSE`
+   - `CREATE ROLE`, `GRANT ROLE` (SECURITYADMIN or USERADMIN)
+   - `CREATE STAGE`, `CREATE PIPE`, `CREATE TASK`, `CREATE STREAM`
+   - `CREATE USER` (USERADMIN)
+   - Most Cortex AI, Streamlit, Dynamic Tables, Iceberg, and ML operations
+
+   **Step 2 — Discover the user's actual roles.**
+   Invoke the `know-your-data` skill to find out what roles the user has available. Don't assume — check.
+
+   **Step 3 — Identify the minimum viable role.**
+   Map the operations in the guide to the minimum role needed. Present a clear finding:
+
+   ```
+   ## Role Check
+
+   The guide requires ACCOUNTADMIN. Here's what actually needs it:
+   - CREATE NETWORK RULE → ✅ genuinely needs ACCOUNTADMIN
+   - CREATE DATABASE → ✅ SYSADMIN is enough
+   - GRANT ROLE → ✅ SECURITYADMIN is enough
+
+   Minimum roles for this POC: SYSADMIN + SECURITYADMIN
+   You have: [list from know-your-data]
+   Status: [Ready to build / You need X granted first]
+   ```
+
+   **Step 4 — Flag blockers early.**
+   If the user is missing a role they genuinely need, say so now — not mid-build. Tell them exactly what to request and from whom (check `SHOW GRANTS OF ROLE SECURITYADMIN` to find who can grant it).
+
+This step runs silently or with a brief "Let me check the latest docs and your roles..." — don't make the user wait through a research monologue.
 
 ---
 
@@ -374,9 +414,9 @@ Run a structured verification before declaring the POC complete:
    SELECT SYSTEM$STREAM_GET_TABLE_TIMESTAMP('<stream>');
    ```
 3. **End-to-end trace** — Pick one record from the source and trace it through every step to the final output. Show the user the path.
-4. **Permission check** — Confirm everything runs under the user's current role. No leftover ACCOUNTADMIN or SYSADMIN usage.
+4. **Permission check** — Confirm everything runs under the user's current role. No leftover ACCOUNTADMIN or SYSADMIN usage beyond what was identified as genuinely required in Phase 1f.
    ```sql
-   SELECT CURRENT_ROLE();  -- Should be user's working role, not elevated
+   SELECT CURRENT_ROLE();  -- Should be minimum viable role, not elevated unnecessarily
    ```
 5. **Idempotency check** — Can you re-run the POC without breaking it? If not, note what needs manual cleanup between runs.
 
