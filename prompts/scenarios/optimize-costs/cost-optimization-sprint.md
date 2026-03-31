@@ -6,10 +6,11 @@
 
 ```
 Analyze my account's warehouse usage for the past 30 days. Find warehouses that are
-over-provisioned (low avg utilization), queries that are spilling to remote storage,
-and tables that would benefit from clustering keys or search optimization. For each
-finding, give me the exact ALTER or CREATE statement to fix it. Prioritize by estimated
-credit savings.
+over-provisioned (low avg utilization, including multi-cluster MAX_CLUSTERS settings),
+queries that are spilling to remote storage, and tables that would benefit from clustering
+keys or search optimization. For each finding, show me the exact ALTER or CREATE statement
+to fix it, prioritized by estimated credit savings. Don't execute any changes — show me
+the full plan first and wait for my approval before touching anything.
 ```
 
 ## What This Triggers
@@ -28,5 +29,4 @@ credit savings.
 ## Tips
 
 - Replace "30 days" with a shorter window if you want a quick check
-- Add "don't execute anything — just show me the plan" for a dry run
 - Say "focus on my ANALYTICS_WH warehouse only" to narrow scope

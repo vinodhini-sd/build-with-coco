@@ -29,4 +29,4 @@ Dynamic Table so enrichments stay current as new data arrives.
 - Replace the table, columns, and categories with your actual data
 - Works for any text enrichment: customer reviews, chat logs, emails
 - Add "also create a Streamlit dashboard showing ticket volume by category" for visualization
-- Say "use mistral-large for classification" to specify a model
+- Say "classify into 3 categories: Billing, Technical, General" to seed CoCo with your taxonomy upfront

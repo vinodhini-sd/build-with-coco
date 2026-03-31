@@ -6,7 +6,8 @@
 
 ```
 Set up automated data quality monitoring on {{database.schema.table}} using Snowflake Data
-Metric Functions. Ask me which columns matter most, then add monitors for row count anomalies,
+Metric Functions. Ask me which columns matter most and whether I want checks to run on a
+cron schedule or trigger on DML events, then add monitors for row count anomalies,
 NULL rates, freshness, and duplicates. Show me the DMF definitions and how to query the results.
 ```
 
@@ -15,7 +16,7 @@ NULL rates, freshness, and duplicates. Show me the DMF definitions and how to qu
 - Data quality skill invocation
 - Custom DMF creation (row count, NULL rate, freshness, duplicates)
 - DMF attachment to the target table
-- Results querying via DATA_QUALITY_MONITORING_RESULTS view
+- Results querying via SNOWFLAKE.LOCAL.DATA_QUALITY_MONITORING_RESULTS (DMF results API)
 
 ## Before You Run
 

@@ -90,7 +90,7 @@ and my own pipeline metadata. Add a button to manually trigger a task.
 My app at {{/path/to/app/}} shows records from a support table. Add:
 - Sentiment badge on each record (using AI_SENTIMENT)
 - Auto-summary on detail page (using AI_SUMMARIZE)
-- Smart search using vector similarity (using EMBED_TEXT)
+- Smart search using vector similarity (using EMBED_TEXT_768 for cosine similarity search)
 ```
 
 ## 12. Fix a Streamlit SHOW command error
@@ -108,12 +108,13 @@ approve or reject each one, and the decisions get written back to a review table
 Include bulk approve/reject.
 ```
 
-## 14. Run my app and fix what's broken
+## 14. Run my app locally and fix what's broken
 
 ```
 My Streamlit app at {{/path/to/app.py}} has issues I can't easily spot in code.
-Open it in a browser, screenshot what it looks like, identify anything broken or
-wrong visually, fix the code, and reload to confirm.
+Run it locally (browser automation only works in local dev — not in Streamlit in
+Snowflake deployments). Screenshot what it looks like, identify anything broken
+or wrong visually, fix the code, and reload to confirm.
 ```
 
 ## 15. Build a chatbot UI in Streamlit

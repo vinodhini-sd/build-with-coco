@@ -5,10 +5,12 @@
 ## The Prompt
 
 ```
-Harden the governance posture of {{database.schema}}: classify all tables for sensitive
-data, apply masking policies to any PII columns you find, and set up row access policies
-for role-based filtering. Then generate a governance maturity score and show me what's
-still missing. Do each step sequentially and verify before moving on.
+Harden the governance posture of {{database.schema}}: run SYSTEM$CLASSIFY on all tables,
+then show me which columns were flagged as PII and what masking policies you plan to apply.
+Wait for my explicit approval before applying any masking — masking takes effect immediately
+for all queries, including BI dashboards. Then set up row access policies for role-based
+filtering. Generate a governance maturity score and show me what's still missing. Do each
+step sequentially and verify before moving on.
 ```
 
 ## What This Triggers

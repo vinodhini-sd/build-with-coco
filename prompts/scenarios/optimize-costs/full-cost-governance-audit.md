@@ -7,8 +7,10 @@
 ```
 Run a full audit of my Snowflake account: find my top 10 most expensive warehouses by
 credit consumption this month, check which tables have no masking or row access policies
-applied, and identify any tables with unclassified PII columns. Spawn parallel agents for
-each workstream and give me a combined summary at the end.
+applied, and identify unclassified PII columns in {{database}}.{{schema}} (scope the PII
+scan to a specific database and schema — account-wide classification on large schemas can
+take several minutes). Spawn parallel agents for each workstream and give me a combined
+summary at the end.
 ```
 
 ## What This Triggers

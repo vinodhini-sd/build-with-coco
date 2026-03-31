@@ -44,12 +44,13 @@ Analyze the model SQL, find the root cause, and suggest a fix. Run the fixed
 version to verify.
 ```
 
-## 6. Build a Dynamic Table pipeline
+## 6. Generate and test verified queries for a semantic view
 
 ```
-Replace my scheduled task that refreshes {{database}}.{{schema}}.{{table}} with
-a Dynamic Table. Set target lag to 5 minutes. Make sure the DAG is correct
-and the DT is in a healthy state.
+I have a semantic view at {{database}}.{{schema}}.{{semantic_view}}. Generate
+verified query representations (VQRs) for the 10 most common business questions
+this view should answer. Run each through Cortex Analyst, check the results match
+business expectations, and save the passing ones back to the semantic view.
 ```
 
 ## 7. Add data quality tests to all my models

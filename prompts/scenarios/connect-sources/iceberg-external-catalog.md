@@ -5,10 +5,10 @@
 ## The Prompt
 
 ```
-Set up Iceberg tables in Snowflake to query my existing data lake on {{cloud-storage-provider}}.
-Ask me for the storage path, IAM role or access credentials, and catalog type (e.g. AWS Glue,
-Unity Catalog), then create the external volume, catalog integration, and Iceberg tables.
-Verify I can query the data and that auto-refresh is working.
+Set up Iceberg tables in Snowflake to query my existing data lake. Ask me for the cloud
+storage provider, storage path, IAM role or access credentials, and catalog type (e.g.
+AWS Glue, Unity Catalog), then create the external volume, catalog integration, and Iceberg
+tables. Verify I can query the data and that auto-refresh is working.
 ```
 
 ## What This Triggers
@@ -23,7 +23,7 @@ Verify I can query the data and that auto-refresh is working.
 
 - S3 bucket with Parquet/Iceberg data
 - AWS Glue catalog managing the tables
-- IAM role ARN with trust policy for Snowflake
+- IAM role ARN with trust policy configured to allow Snowflake to assume it — Snowflake provides the external ID during integration creation; the trust policy must already exist before this prompt will complete
 - ACCOUNTADMIN role (for integration objects)
 
 ## Tips

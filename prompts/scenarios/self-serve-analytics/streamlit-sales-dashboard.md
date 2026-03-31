@@ -5,8 +5,8 @@
 ## The Prompt
 
 ```
-Build a Streamlit in Snowflake dashboard for my {{use-case}} data. Ask me for the source
-table and which KPIs, dimensions, and filters to include, then build a polished app with
+Build a Streamlit in Snowflake dashboard for my data. Ask me for the use case, source
+table, and which KPIs, dimensions, and filters to include, then build a polished app with
 metric cards and charts and deploy it.
 ```
 

@@ -16,7 +16,7 @@ my active customers and show me feature importance and model metrics.
 - Machine learning skill (full ML pipeline)
 - Feature engineering and train/test split
 - XGBoost training with hyperparameter tuning
-- Model Registry logging (experiment tracking)
+- Model Registry (model version registration and metadata logging)
 - Model service deployment for inference
 - Batch prediction on active customers
 
@@ -24,7 +24,7 @@ my active customers and show me feature importance and model metrics.
 
 - Snowflake ML feature store or a feature table with training data
 - A labeled dataset (with the target column — e.g., `churned`)
-- Compute pool or warehouse for training
+- Warehouse for Snowpark ML training (compute pools are for SPCS container workloads, not Snowpark ML)
 
 ## Tips
 

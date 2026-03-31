@@ -45,20 +45,22 @@ Set up Snowpipe Streaming to ingest events from my Kafka topic into
 definition, and how to monitor lag.
 ```
 
-## 6. Optimize my most expensive pipeline
+## 6. Optimize a slow pipeline stage
 
 ```
-My nightly ETL pipeline on {{warehouse}} takes too long. Profile the queries,
-identify the bottlenecks, and suggest optimizations — clustering, partitioning,
-query rewrite, or parallelization.
+My nightly ETL on {{warehouse}} is taking too long. Pull the slowest queries from
+QUERY_HISTORY for this warehouse, profile the top 3 bottlenecks, and give me
+specific fixes — clustering keys, partition pruning improvements, query rewrites,
+or spill reduction. Show before/after query profiles.
 ```
 
-## 7. Set up a complete Iceberg lakehouse
+## 7. Build a multi-layer Dynamic Table pipeline over Iceberg
 
 ```
-Design and build a lakehouse architecture: raw Iceberg tables from S3, staging
-Dynamic Tables for cleansing, and mart-layer Dynamic Tables for reporting.
-Include governance (masking, row access) from the start.
+I have raw Iceberg tables in {{database}}.{{schema}} from S3. Build a two-layer
+Dynamic Table pipeline on top: a staging layer that cleans and casts types, and a
+mart layer that aggregates for reporting. Set appropriate target lags and verify
+each layer reaches a HEALTHY state before building the next.
 ```
 
 ## 8. Debug a failing Snowflake Task
@@ -92,12 +94,13 @@ deduplicates, applies transformations, and merges into
 error handling.
 ```
 
-## 12. Configure external tables on S3
+## 12. Load data with COPY INTO and inline transformations
 
 ```
-I have CSV files landing in {{s3://your-bucket/path/}} partitioned by date. Set
-up an external table with auto-refresh, the correct file format, and a view that
-makes it queryable like a regular Snowflake table.
+I have files landing in a Snowflake stage at {{stage_path}}. Set up a COPY INTO
+pipeline that reads the files, applies column transformations and type casting
+inline, and lands data into {{database}}.{{schema}}.{{table}}. Include error
+handling for malformed rows and a Snowflake Task to run it on a schedule.
 ```
 
 ## 13. Validate my migration from another data warehouse
@@ -116,10 +119,11 @@ with proper three-tier role patterns, DEFINE TABLE/SCHEMA statements, and
 a manifest.yml. Show me how to deploy and rollback changes.
 ```
 
-## 15. Monitor pipeline health across my account
+## 15. Inspect and manage a complex Task DAG
 
 ```
-Build a Streamlit app that shows: task run history, failed/succeeded status,
-pipeline lag, and row delta per table. Connect to ACCOUNT_USAGE.TASK_HISTORY
-and my pipeline metadata tables.
+Show me the full dependency graph for tasks in {{database}}.{{schema}}, including
+which tasks are currently suspended, which are in a failed state, and the full
+execution order. If any tasks are failing, diagnose the root cause and help me
+resume them without re-running already-completed upstream tasks.
 ```

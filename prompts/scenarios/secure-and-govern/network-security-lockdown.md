@@ -7,8 +7,10 @@
 ```
 Review my account's network security posture. List all current network policies and rules,
 check if there are any overly permissive CIDR ranges (like 0.0.0.0/0), and verify that
-all service accounts have network policies assigned. Recommend a tighter configuration
-and generate the SQL to implement it. Don't execute anything destructive — just show me the plan.
+service accounts have user-level network policies assigned — check this via SHOW USERS and
+DESCRIBE USER, since account-level policies alone don't cover per-user gaps. Recommend a
+tighter configuration and generate the SQL to implement it. Don't execute anything
+destructive — just show me the plan.
 ```
 
 ## What This Triggers

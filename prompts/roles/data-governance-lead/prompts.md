@@ -37,12 +37,14 @@ Flag any roles that have broader access than they should. Produce a report I can
 share with my security team.
 ```
 
-## 5. Set up data quality monitoring
+## 5. Review data quality compliance across my schema
 
 ```
-Create Data Metric Functions for {{database}}.{{schema}}.{{table}}: row count
-freshness (alert if no new rows in 2hrs), NULL rate on key columns (alert if > 1%),
-duplicate detection on primary key. Show me how to read the results.
+Pull DMF results from SNOWFLAKE.LOCAL.DATA_QUALITY_MONITORING_RESULTS for all
+tables in {{database}}.{{schema}}. Show me which tables are failing quality checks,
+group violations by type (freshness, NULL rate, duplicates), and flag any that
+affect PII-tagged or compliance-relevant tables. Summarize findings in a format
+I can include in a compliance report.
 ```
 
 ## 6. Generate a governance maturity score
@@ -77,12 +79,13 @@ issues, group them by category (MFA, network, privileges), and give me the
 remediation SQL for each one.
 ```
 
-## 10. Build a compliance report
+## 10. Build a regulation-specific compliance report
 
 ```
-Query ACCOUNT_USAGE to produce a compliance readiness report: audit log retention,
-network policy coverage, masking policy on sensitive columns, encryption status,
-and user access reviews. Output as a structured report.
+I need a compliance readiness report mapped to {{regulation}} (e.g. GDPR, HIPAA,
+PCI-DSS). Query ACCOUNT_USAGE to check PII masking coverage, audit log retention,
+network policy enforcement, encryption status, and access reviews. Output findings
+structured against the specific requirements of that regulation.
 ```
 
 ## 11. Set up tag-based masking at scale
@@ -117,10 +120,12 @@ views, DTs, or exports include them. Flag any pipeline that moves PII outside
 the source schema without masking applied.
 ```
 
-## 15. Generate a data contract for my core tables
+## 15. Generate data contracts as documentation
 
 ```
 For each table in {{database}}.{{schema}}, generate a YAML data contract: schema
 definition, SLA (freshness, row count bounds), quality checks, owner, and
 consumers. Use the actual table metadata and ACCOUNT_USAGE as source of truth.
+Note: these are documentation artifacts — they describe expectations but are not
+natively enforced by Snowflake. Use alongside DMFs and masking policies for enforcement.
 ```

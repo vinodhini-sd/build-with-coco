@@ -38,20 +38,22 @@ For each one: show the warehouse, user, query text summary, and whether it could
 be optimized with clustering, search optimization, or a query rewrite.
 ```
 
-## 5. Set up a Snowflake integration
+## 5. Set up a cloud storage integration
 
 ```
-I need to connect Snowflake to [Kafka / S3 / Azure Event Hub / my notification service].
-Walk me through creating the storage or notification integration, setting the correct
-IAM policies, and verifying the connection works.
+I need Snowflake to access files in my cloud storage. Ask me which cloud provider
+(S3, Azure Blob, or GCS) and storage path, then create the storage integration,
+walk me through configuring the trust policy or service principal, and verify
+Snowflake can read files from that location.
 ```
 
-## 6. Audit my account's cost attribution
+## 6. Set up cost attribution tagging for teams
 
 ```
-I have multiple teams sharing one Snowflake account. Show me how to attribute costs
-per team using resource monitors, query tags, or custom tagging. Generate a
-weekly cost allocation report by team.
+I have multiple teams sharing this Snowflake account with no cost attribution in
+place. Set up a tagging strategy (query tags, warehouse naming, or resource
+monitors per team). Show me the ALTER SESSION commands developers should use, and
+write a reusable weekly query to report credits consumed per team.
 ```
 
 ## 7. Find serverless feature spend

@@ -98,8 +98,8 @@ actuals. Alert me when any metric exceeds threshold.
 
 ```
 Spawn a team of 3 agents: one searches my Snowflake data for patterns, one
-searches the web for industry benchmarks, one analyzes the output from both
-and writes a synthesis report. Coordinate via the Task tool.
+searches the web for industry benchmarks, one synthesizes both and writes a
+report. Use CoCo's multi-agent coordination to run them in parallel.
 ```
 
 ## 13. Create an AI-powered data catalog
@@ -110,12 +110,14 @@ AI_COMPLETE to generate a plain English description based on column names, sampl
 values, and relationships. Store results and build a searchable Streamlit catalog.
 ```
 
-## 14. Fine-tune a text classifier for my domain
+## 14. Build and evaluate a custom text classifier
 
 ```
-I have labeled examples in {{database}}.{{schema}}.{{table}}. Use CLASSIFY_TEXT
-to build a custom classifier for my taxonomy. Evaluate precision/recall, iterate
-on the label definitions, and deploy it as a reusable Snowpark UDF.
+I have labeled examples in {{database}}.{{schema}}.{{table}}. Use AI_CLASSIFY
+to build a classifier for my custom taxonomy. Benchmark at least 3 different
+category definitions and prompting strategies against my labeled ground truth,
+report precision and recall for each, then deploy the best-performing
+configuration as a reusable Snowpark UDF.
 ```
 
 ## 15. Build an agentic data pipeline debugger

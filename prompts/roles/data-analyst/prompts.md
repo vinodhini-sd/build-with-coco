@@ -102,8 +102,8 @@ the result as a formatted table.
 ## 13. Explain a join I'm getting wrong
 
 ```
-I'm joining two tables and getting duplicate rows. Here's my SQL: [paste].
-Explain exactly why duplicates are happening and fix it.
+I'm joining two tables and getting duplicate rows. I'll share my SQL in the next
+message. Explain exactly why duplicates are happening and fix it.
 ```
 
 ## 14. Set up automated freshness alerts
@@ -117,6 +117,7 @@ wire it to a Snowflake alert that emails me.
 ## 15. Convert a spreadsheet into a Snowflake query
 
 ```
-I have this Excel model [upload/describe]. Recreate it as a SQL query I can run
-against my Snowflake tables. Identify which tables to join and write the full query.
+I have an Excel model I want to recreate as a SQL query. Ask me to describe the
+columns, calculations, and logic in the spreadsheet, then help me identify which
+Snowflake tables to join and write the full query.
 ```

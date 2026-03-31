@@ -29,3 +29,4 @@ exactly what would break and give me a migration plan. Don't make any changes ye
 - Replace the table/column with your actual planned change
 - Works for any breaking change: column drops, type changes, table renames
 - Add "also check if any Cortex Agents or semantic views reference this" for full coverage
+- Lineage covers Snowflake-native objects only — views, dynamic tables, tasks, pipes. External BI tools (Tableau, Looker, Sigma) and dbt models won't appear in results

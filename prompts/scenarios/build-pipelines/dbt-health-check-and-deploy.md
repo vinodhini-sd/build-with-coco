@@ -6,8 +6,9 @@
 
 ```
 Run a full health check on my dbt project at {{project-path}}: check it compiles cleanly,
-review test coverage across all models, and flag any models with stale sources. Then deploy
-to Snowflake using snow dbt deploy. Summarize findings before deploying.
+review test coverage across all models, and flag any models with stale sources. Summarize
+findings, then ask me whether to deploy. If deploying, use snow dbt deploy for Snowflake-native
+execution — or dbt build if I'm on standard dbt Core without snow dbt configured.
 ```
 
 ## What This Triggers
@@ -15,8 +16,7 @@ to Snowflake using snow dbt deploy. Summarize findings before deploying.
 - dbt project validation (compile check)
 - Test coverage analysis across all models
 - Source freshness inspection
-- `snow dbt deploy` for Snowflake-native deployment
-- Multi-agent team for parallel workstreams
+- `snow dbt deploy` for Snowflake-native deployment (or `dbt build` for standard dbt Core)
 
 ## Before You Run
 
