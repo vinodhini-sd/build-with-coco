@@ -1,7 +1,6 @@
 ---
 name: know-your-data
 description: "Discover data you already have access to in a Snowflake account, understand what it contains, and map it to your roles. Use when: searching for data, exploring your account, understanding available tables, what data do I have, what can I query, data discovery, know my data, explore my account, what tables exist, help me find data. Triggers: know your data, know my data, find data, data discovery, explore account, what data, what tables, what can I access, discover data, search tables."
-tools: ["Bash", "snowflake_sql_execute", "ask_user_question"]
 ---
 
 # Know Your Data
