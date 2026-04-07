@@ -10,6 +10,7 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 | [developer-voice](skills/developer-voice/SKILL.md) | Research real developer sentiment from Reddit and community forums, then synthesize into talk tracks, research briefs, or competitive intel grounded in practitioner quotes | "developer voice", "community pulse", "reddit research", "talk track", "what are developers saying", "pain points" |
 | [know-your-data](skills/know-your-data/SKILL.md) | Discover data you already have access to in a Snowflake account, understand what it contains, and map it to your roles | "know your data", "know my data", "find data", "data discovery", "what can I access", "explore account" |
 | [poc-builder](skills/poc-builder/SKILL.md) | Go from zero to a working POC with any Snowflake guide, blog post, doc link, or topic name. Deep-dives the content, extracts a demo spec, finds matching data in your account, and builds a working POC interactively | "poc builder", "build this", "zero to poc", "try this", "teach me", "walk me through", "prototype this", "run this guide" |
+| [aws-glue-iceberg-setup](skills/aws-glue-iceberg-setup/SKILL.md) | Set up AWS Glue as an Iceberg catalog for Snowflake — crawl S3 data, register tables, configure external volumes, and query via Iceberg | "glue iceberg", "aws glue setup", "iceberg from s3", "external catalog", "glue crawler" |
 
 ## Recipes
 
@@ -134,5 +135,6 @@ To add a new skill:
 
 1. Create a directory under `skills/<skill-name>/`
 2. Add a `SKILL.md` following the [Cortex Code skill format](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code)
-3. Update this README with the skill entry
-4. Submit a PR
+3. If `SKILL.md` exceeds 150 lines, add a `COMPASS.md` (see [`docs/COMPASS_GUIDE.md`](docs/COMPASS_GUIDE.md))
+4. Update this README with the skill entry
+5. Submit a PR
