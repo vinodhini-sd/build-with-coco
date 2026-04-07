@@ -157,7 +157,7 @@ Do you approve this model? (Yes / Modify / Switch to [alternative pattern])
          type: snowflake
          account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
          user: "{{ env_var('SNOWFLAKE_USER') }}"
-         authenticator: externalbrowser
+         authenticator: externalbrowser  # interactive-only — breaks in CI/CD. For non-interactive use, set authenticator: snowflake with username/password, or use the Snowflake CLI connection instead.
          warehouse: <WAREHOUSE>
          database: <SOURCE_DATABASE>
          schema: <TARGET_SCHEMA>

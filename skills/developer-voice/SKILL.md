@@ -1,7 +1,7 @@
 ---
 name: developer-voice
 description: "Research what real developers are saying about a topic on Reddit and community forums, then synthesize into a narrative talk track or content brief grounded in practitioner quotes. Use when: building talk tracks, researching community sentiment, preparing for a talk or blog, competitive analysis, understanding developer pain points, creating feature narratives. Triggers: developer voice, community pulse, reddit research, practitioner sentiment, talk track, field research, community intel, what are developers saying, pain points, feature narrative."
-tools: ["Bash", "Read", "Write", "WebFetch", "web_search", "ask_user_question"]
+tools: ["Bash", "Read", "Write", "web_fetch", "web_search", "ask_user_question"]
 ---
 
 # Developer Voice
@@ -128,7 +128,7 @@ Create an HTML file with clean, professional styling:
 - Use tables for comparisons and matrices
 - Include purple "talk notes" as delivery hints (for talk-track format)
 - Make it responsive and printable
-- Save to `~/{Topic_Slug}_Developer_Voice.html`
+- Save to `~/Documents/devrel/<TOPIC_SLUG>_Developer_Voice.html`
 
 Open the file in the browser with `open` command.
 

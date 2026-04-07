@@ -27,6 +27,6 @@ execution — or dbt build if I'm on standard dbt Core without snow dbt configur
 
 ## Tips
 
-- Replace `~/my_dbt_project` with your actual project path
+- Replace `{{project-path}}` with your actual project path
 - Remove the deploy step if you just want a health check: "Don't deploy yet, just report findings"
 - Add "fix any compilation errors you find" for auto-remediation

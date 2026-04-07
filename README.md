@@ -63,7 +63,14 @@ build-with-coco/
 │   ├── ai-enrichment/
 │   └── README.md
 ├── AGENTS.md                # agent contribution guide
-└── install.sh
+├── install.sh
+└── hooks/                   # session hooks (optional)
+    ├── check-errors.py
+    ├── session-start.sh
+    ├── set-tab-title.sh
+    ├── tab-title-helper.py
+    ├── whats-new-helper.py
+    └── README.md
 ```
 
 ## What Are Cortex Code Skills?
