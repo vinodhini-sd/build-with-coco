@@ -16,6 +16,7 @@ Context for AI coding agents (Cortex Code, Claude Code, etc.) working in this re
 ```
 skills/<skill-name>/
 ├── SKILL.md           ← required: triggers + core workflow only
+├── COMPASS.md         ← required for skills >150 lines: 25–35 line navigation guide
 └── references/        ← optional: loaded on demand by CoCo
     └── workflow.md    ← detailed steps, SQL, code templates, etc.
 ```
@@ -23,6 +24,7 @@ skills/<skill-name>/
 ### Rules
 
 - **SKILL.md must stay under 500 lines.** When approaching the limit, split detailed content into `references/`.
+- **COMPASS.md is required for any skill >150 lines.** Keep it to 25–35 lines. Four sections only: Quick Commands, Key Files, Non-Obvious Patterns, See Also. See [`docs/COMPASS_GUIDE.md`](docs/COMPASS_GUIDE.md) for the full format and critic checklist.
 - **No README.md in skill directories.** The root `README.md` is the only index.
 - **Frontmatter is required.** Every SKILL.md must have `name:` and `description:` in YAML frontmatter. The description drives skill triggering — make it clear and include trigger phrases.
 - **Context window is a public good.** Only put content in SKILL.md that the model needs in working memory. Move detailed steps, SQL templates, and reference material to `references/`.
@@ -43,8 +45,9 @@ description: "What this skill does and when to use it. Include trigger phrases: 
 1. Create `skills/<skill-name>/`
 2. Add `SKILL.md` with YAML frontmatter + workflow body
 3. If body exceeds ~300 lines, split detailed content into `references/`
-4. Add an entry to the skills table in `README.md`
-5. Verify: `./install.sh --project && ls .cortex/skills/<skill-name>/`
+4. If body exceeds 150 lines, add `COMPASS.md` (see [`docs/COMPASS_GUIDE.md`](docs/COMPASS_GUIDE.md))
+5. Add an entry to the skills table in `README.md`
+6. Verify: `./install.sh --project && ls .cortex/skills/<skill-name>/`
 
 ### Splitting SKILL.md into references/
 
@@ -192,7 +195,7 @@ git push origin feature/add-new-skill
 
 When making changes, update all relevant docs in the same commit/PR:
 
-- **Adding a skill:** update the skills table in `README.md`
+- **Adding a skill:** update the skills table in `README.md`; add `COMPASS.md` if skill >150 lines
 - **Adding a recipe:** update `recipes/README.md` catalog table AND the scenario table in `README.md`
 - **Adding a hook:** update `hooks/README.md`
 - **Any notable change:** add an entry to `CHANGELOG.md`
@@ -206,6 +209,8 @@ build-with-coco/
 ├── CHANGELOG.md       ← version history
 ├── README.md          ← human-facing index
 ├── install.sh         ← installer
+├── docs/              ← authoring guides
+│   └── COMPASS_GUIDE.md  ← how to write COMPASS.md navigation files
 ├── skills/            ← CoCo skill automations
 ├── recipes/           ← copy-paste workflow prompts
 │   ├── by-role/       ← persona cheat sheets (10-15 prompts per role)

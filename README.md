@@ -35,16 +35,24 @@ build-with-coco/
 ├── skills/
 │   ├── dbt-model-generator/
 │   │   ├── SKILL.md
+│   │   ├── COMPASS.md           # 25–35 line navigation guide
 │   │   └── references/
 │   │       └── workflow.md
 │   ├── developer-voice/
 │   │   ├── SKILL.md
+│   │   ├── COMPASS.md
 │   │   └── references/
 │   │       └── html-styling.md
 │   ├── know-your-data/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── COMPASS.md
+│   ├── aws-glue-iceberg-setup/
+│   │   ├── SKILL.md
+│   │   ├── COMPASS.md
+│   │   └── references/
 │   └── poc-builder/
 │       ├── SKILL.md
+│       ├── COMPASS.md
 │       └── references/
 │           ├── ACCOUNT_DISCOVERY.md
 │           ├── BUILD_SUMMARY_TEMPLATE.md
@@ -62,6 +70,8 @@ build-with-coco/
 │   ├── self-serve-analytics/
 │   ├── ai-enrichment/
 │   └── README.md
+├── docs/
+│   └── COMPASS_GUIDE.md     # how to write COMPASS.md files
 ├── AGENTS.md                # agent contribution guide
 ├── install.sh
 └── hooks/                   # session hooks (optional)
