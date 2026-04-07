@@ -1,36 +1,26 @@
-# SessionStart Hooks
+# Cortex Code Hooks
 
-Two hooks that run at Cortex Code session start to surface errors and tips.
+Session hooks that run automatically on startup and on each prompt. Drop them into `~/.snowflake/cortex/hooks/` and register them in `hooks.json`.
 
-Disabled by default — only runs when `COCO_ALERTS=1 cortex` is used, so normal `cortex` sessions start instantly.
+## What's Included
 
-## What It Does
+| File | Event | What it does |
+|---|---|---|
+| `session-start.sh` | `SessionStart` | Unified orchestrator: runs error alerts if configured, then What's New |
+| `check-errors.py` | (called by session-start.sh) | Checks Snowflake tasks, alerts, dynamic tables, copy/pipe loads, GitHub CI, Airflow |
+| `whats-new-helper.py` | (called by session-start.sh) | Diffs CoCo versions, surfaces new skills, gives tier-based tips |
+| `set-tab-title.sh` | `UserPromptSubmit` | Sets terminal tab title from first prompt in session |
+| `tab-title-helper.py` | (called by set-tab-title.sh) | Extracts and cleans the prompt into a short title |
 
-**`check-errors.py`** — parallel error checker. Fires all checks concurrently:
-- Snowflake task failures (last 24h)
-- Snowflake alert failures (last 24h)
-- Dynamic table refresh failures (last 6h)
-- Copy/pipe load failures (last 24h)
-- GitHub PRs with failing CI (parallel per-PR fetches)
-- Airflow DAG import errors
-
-**`whats-new-helper.py`** — personalized tips. Reads your local conversation history to detect your user tier and gaps, then shows a relevant nudge, new skill, or version diff.
-
-`session-start.sh` orchestrates both: if errors are found, show those. If all clear, show the tip.
-
-## Setup
-
-### 1. Install the hook files
+## Installation
 
 ```bash
 mkdir -p ~/.snowflake/cortex/hooks
-cp hooks/session-start.sh ~/.snowflake/cortex/hooks/
-cp hooks/check-errors.py ~/.snowflake/cortex/hooks/
-cp hooks/whats-new-helper.py ~/.snowflake/cortex/hooks/
-chmod +x ~/.snowflake/cortex/hooks/session-start.sh
+cp hooks/*.sh hooks/*.py ~/.snowflake/cortex/hooks/
+chmod +x ~/.snowflake/cortex/hooks/*.sh
 ```
 
-### 2. Register the hook in `~/.snowflake/cortex/hooks.json`
+Then register in `~/.snowflake/cortex/hooks.json`:
 
 ```json
 {
@@ -40,8 +30,19 @@ chmod +x ~/.snowflake/cortex/hooks/session-start.sh
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/YOUR_USERNAME/.snowflake/cortex/hooks/session-start.sh",
+            "command": "/Users/YOU/.snowflake/cortex/hooks/session-start.sh",
             "timeout": 40
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/YOU/.snowflake/cortex/hooks/set-tab-title.sh",
+            "timeout": 5
           }
         ]
       }
@@ -50,57 +51,71 @@ chmod +x ~/.snowflake/cortex/hooks/session-start.sh
 }
 ```
 
-### 3. Store your Snowflake PAT(s)
+Replace `/Users/YOU` with your actual home path.
+
+## Configuration
+
+### Tab title (no config needed)
+
+`set-tab-title.sh` works out of the box. It reads the first prompt of each session, strips conversational filler, and sets the terminal tab title via OSC escape sequences.
+
+### What's New (no config needed)
+
+`whats-new-helper.py` automatically detects your installed CoCo version, diffs skills between versions, and classifies you as new/beginner/returning/power user based on local conversation history. No env vars required.
+
+### Error alerts (optional, off by default)
+
+`check-errors.py` polls Snowflake and GitHub for failures. It only runs when `COCO_ALERTS=1` is set. Configure by exporting these in your shell profile (`.zshrc` / `.bashrc`):
+
+**Primary Snowflake account:**
+
+```bash
+export COCO_SF_ACCOUNT=your_account_identifier   # e.g. myorg-myaccount
+export COCO_SF_USER=your_username
+export COCO_SF_WAREHOUSE=COMPUTE_WH              # optional
+```
+
+Store your PAT via the Cortex secret store (never paste it in plain text):
 
 ```bash
 cortex secret store COCO_SF_PAT --prompt
-# optional second account:
+```
+
+**Secondary Snowflake account (optional):**
+
+```bash
+export COCO_SF_ACCOUNT_2=your_second_account
+export COCO_SF_USER_2=your_second_username
+export COCO_SF_WAREHOUSE_2=COMPUTE_WH
+```
+
+```bash
 cortex secret store COCO_SF_PAT_2 --prompt
 ```
 
-### 4. Set your account config
-
-Add to `~/.zshrc` (or `~/.bashrc`):
+**Airflow (optional, localhost only):**
 
 ```bash
-export COCO_SF_ACCOUNT="your-account-identifier"   # e.g. myorg-myaccount
-export COCO_SF_USER="YOUR_USERNAME"
-export COCO_SF_WAREHOUSE="YOUR_WAREHOUSE"
-
-# Optional second account
-export COCO_SF_ACCOUNT_2="your-second-account"
-export COCO_SF_USER_2="YOUR_USERNAME_2"
-export COCO_SF_WAREHOUSE_2="YOUR_WAREHOUSE_2"
+export AIRFLOW_API_URL=http://localhost:8080
+export AIRFLOW_USER=admin
+export AIRFLOW_PASSWORD=your_password
 ```
 
-### 5. Add the alias
+The `"<KEY_NAME>"` syntax in `session-start.sh` is Cortex Code's secret injection — it substitutes stored secrets at runtime without ever writing them to a file.
+
+To activate alerts for a session:
 
 ```bash
-echo "alias cortex-check='COCO_ALERTS=1 cortex'" >> ~/.zshrc
-source ~/.zshrc
+COCO_ALERTS=1 cortex
 ```
 
-## Usage
+## What the alerts check
 
-```bash
-cortex              # instant startup, no hook
-cortex-check        # startup with parallel error checks + tips
-```
+- Snowflake tasks failed in the last 24h (primary + secondary account)
+- Snowflake alerts in FAILED / CONDITION_FAILED / ACTION_FAILED state
+- Dynamic table refresh failures in the last 6h
+- Copy/pipe load failures in the last 24h
+- Open GitHub PRs with failing CI (across all your repos)
+- Airflow DAG import errors (local instance)
 
-## Optional: Airflow
-
-Set these env vars if you run Airflow locally (defaults to `localhost:8080`):
-
-```bash
-export AIRFLOW_API_URL="http://localhost:8080"
-export AIRFLOW_USER="admin"
-export AIRFLOW_PASSWORD="admin"
-```
-
-## Dependencies
-
-```bash
-pip install snowflake-connector-python
-```
-
-`gh` CLI must be installed and authenticated for GitHub PR checks.
+All checks run in parallel. If nothing needs attention, What's New runs instead.
