@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# install.sh — Install skills and/or prompts from build-with-coco
+# install.sh — Install skills and/or recipes from build-with-coco
 #
 # Usage:
-#   ./install.sh              # Install everything (skills + prompts)
+#   ./install.sh              # Install everything (skills + recipes)
 #   ./install.sh skills       # Install skills only
-#   ./install.sh prompts      # Install prompts only
+#   ./install.sh recipes      # Install recipes only
 #   ./install.sh --project    # Install into current project (.cortex/) instead of global
 
 set -euo pipefail
@@ -28,7 +28,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_SRC="${SCRIPT_DIR}/skills"
-PROMPTS_SRC="${SCRIPT_DIR}/prompts"
+PROMPTS_SRC="${SCRIPT_DIR}/recipes"
 
 installed=0
 
@@ -50,13 +50,13 @@ install_skills() {
   done
 }
 
-install_prompts() {
+install_recipes() {
   if [[ ! -d "$PROMPTS_SRC" ]]; then
-    echo "⚠ No prompts/ directory found — skipping prompts"
+    echo "⚠ No recipes/ directory found — skipping recipes"
     return
   fi
 
-  local dest="${GLOBAL_DIR}/prompts"
+  local dest="${GLOBAL_DIR}/recipes"
   mkdir -p "$dest"
 
   # Copy category directories (skip README)
@@ -64,14 +64,14 @@ install_prompts() {
     local category_name
     category_name="$(basename "$category_dir")"
     mkdir -p "$dest/$category_name"
-    cp "$category_dir"*.md "$dest/$category_name/" 2>/dev/null || true
+    cp -r "$category_dir"* "$dest/$category_name/" 2>/dev/null || true
     local count
     count=$(find "$dest/$category_name" -name '*.md' | wc -l | tr -d ' ')
-    echo "  ✓ $category_name ($count prompts)"
+    echo "  ✓ $category_name ($count recipes)"
     ((installed += count))
   done
 
-  # Copy prompts README
+  # Copy recipes README
   if [[ -f "$PROMPTS_SRC/README.md" ]]; then
     cp "$PROMPTS_SRC/README.md" "$dest/README.md"
   fi
@@ -92,16 +92,16 @@ case "$INSTALL_TARGET" in
     echo "Installing skills..."
     install_skills
     ;;
-  prompts)
-    echo "Installing prompts..."
-    install_prompts
+  recipes)
+    echo "Installing recipes..."
+    install_recipes
     ;;
   all|*)
     echo "Installing skills..."
     install_skills
     echo ""
-    echo "Installing prompts..."
-    install_prompts
+    echo "Installing recipes..."
+    install_recipes
     ;;
 esac
 
@@ -109,4 +109,4 @@ echo ""
 echo "Done — $installed items installed to $GLOBAL_DIR/"
 echo ""
 echo "Skills: invoke with \$skill-name in Cortex Code"
-echo "Prompts: copy-paste from $GLOBAL_DIR/prompts/ or browse the catalog in prompts/README.md"
+echo "Recipes: copy-paste from $GLOBAL_DIR/recipes/ or browse the catalog in recipes/README.md"
