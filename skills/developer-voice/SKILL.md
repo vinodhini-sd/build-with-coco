@@ -151,21 +151,7 @@ After presenting the artifact, ask if they want:
 
 ## HTML Styling Reference
 
-Use this CSS structure for consistent output across invocations:
-
-```
-Color scheme:
-  - Problems/pain:  bg #fff0f0, border #e53935
-  - Solutions:      bg #f0f9ff, border #29b5e8
-  - Caveats:        bg #fff8e1, border #ffa000
-  - Snowflake:      bg #e8f5fe, border #0d47a1
-  - Get started:    bg #e8f5e9, border #2e7d32
-  - Reddit quotes:  bg #f5f7fa, border-left #29b5e8, italic
-  - Talk notes:     color #7e57c2, border-left #ce93d8, italic, small
-
-Font: system font stack (-apple-system, Segoe UI, etc.)
-Max width: 860px centered
-```
+For consistent HTML output, use the color scheme, callout patterns, and typography in [references/html-styling.md](references/html-styling.md).
 
 ## Notes
 

@@ -11,22 +11,60 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 | [know-your-data](skills/know-your-data/SKILL.md) | Discover data you already have access to in a Snowflake account, understand what it contains, and map it to your roles | "know your data", "know my data", "find data", "data discovery", "what can I access", "explore account" |
 | [poc-builder](skills/poc-builder/SKILL.md) | Go from zero to a working POC with any Snowflake guide, blog post, doc link, or topic name. Deep-dives the content, extracts a demo spec, finds matching data in your account, and builds a working POC interactively | "poc builder", "build this", "zero to poc", "try this", "teach me", "walk me through", "prototype this", "run this guide" |
 
-## Prompts
+## Recipes
 
-Copy-paste prompts in two categories — browse by role or by scenario. Full catalog in [`prompts/README.md`](prompts/README.md).
+Copy-paste prompts in two categories — browse by role or by scenario. Full catalog in [`recipes/README.md`](recipes/README.md).
 
-**By role** (`prompts/roles/`): [data-engineer](prompts/roles/data-engineer/prompts.md), [analytics-engineer](prompts/roles/analytics-engineer/prompts.md), [data-analyst](prompts/roles/data-analyst/prompts.md), [ai-ml-engineer](prompts/roles/ai-ml-engineer/prompts.md), [app-developer](prompts/roles/app-developer/prompts.md), [data-governance-lead](prompts/roles/data-governance-lead/prompts.md), [snowflake-admin](prompts/roles/snowflake-admin/prompts.md)
+**By role** (`recipes/by-role/`): [data-engineer](recipes/by-role/data-engineer/prompts.md), [analytics-engineer](recipes/by-role/analytics-engineer/prompts.md), [data-analyst](recipes/by-role/data-analyst/prompts.md), [ai-ml-engineer](recipes/by-role/ai-ml-engineer/prompts.md), [app-developer](recipes/by-role/app-developer/prompts.md), [data-governance-lead](recipes/by-role/data-governance-lead/prompts.md), [snowflake-admin](recipes/by-role/snowflake-admin/prompts.md)
 
 | Scenario | Prompts |
 |---|---|
-| **Connect sources** | [openflow-postgres-replication](prompts/scenarios/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](prompts/scenarios/connect-sources/iceberg-external-catalog.md) |
-| **Build pipelines** | [dbt-health-check-and-deploy](prompts/scenarios/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](prompts/scenarios/build-pipelines/dynamic-table-pipeline.md) |
-| **Monitor quality** | [data-quality-monitoring](prompts/scenarios/monitor-quality/data-quality-monitoring.md) |
-| **Optimize costs** | [full-cost-governance-audit](prompts/scenarios/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](prompts/scenarios/optimize-costs/cost-optimization-sprint.md) |
-| **Secure & govern** | [governance-hardening](prompts/scenarios/secure-and-govern/governance-hardening.md), [network-security-lockdown](prompts/scenarios/secure-and-govern/network-security-lockdown.md) |
-| **Assess change impact** | [lineage-impact-analysis](prompts/scenarios/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](prompts/scenarios/assess-change-impact/migration-assessment.md) |
-| **Self-serve analytics** | [semantic-view-plus-agent](prompts/scenarios/self-serve-analytics/semantic-view-plus-agent.md), [streamlit-sales-dashboard](prompts/scenarios/self-serve-analytics/streamlit-sales-dashboard.md) |
-| **AI enrichment** | [cortex-ai-ticket-enrichment](prompts/scenarios/ai-enrichment/cortex-ai-ticket-enrichment.md), [ml-churn-prediction](prompts/scenarios/ai-enrichment/ml-churn-prediction.md) |
+| **Connect sources** | [openflow-postgres-replication](recipes/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](recipes/connect-sources/iceberg-external-catalog.md) |
+| **Build pipelines** | [dbt-health-check-and-deploy](recipes/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](recipes/build-pipelines/dynamic-table-pipeline.md) |
+| **Monitor quality** | [data-quality-monitoring](recipes/monitor-quality/data-quality-monitoring.md) |
+| **Optimize costs** | [full-cost-governance-audit](recipes/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](recipes/optimize-costs/cost-optimization-sprint.md) |
+| **Secure & govern** | [governance-hardening](recipes/secure-and-govern/governance-hardening.md), [network-security-lockdown](recipes/secure-and-govern/network-security-lockdown.md) |
+| **Assess change impact** | [lineage-impact-analysis](recipes/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](recipes/assess-change-impact/migration-assessment.md) |
+| **Self-serve analytics** | [semantic-view-plus-agent](recipes/self-serve-analytics/semantic-view-plus-agent.md), [streamlit-sales-dashboard](recipes/self-serve-analytics/streamlit-sales-dashboard.md) |
+| **AI enrichment** | [cortex-ai-ticket-enrichment](recipes/ai-enrichment/cortex-ai-ticket-enrichment.md), [ml-churn-prediction](recipes/ai-enrichment/ml-churn-prediction.md) |
+
+## Repo Structure
+
+```
+build-with-coco/
+├── skills/
+│   ├── dbt-model-generator/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── workflow.md
+│   ├── developer-voice/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── html-styling.md
+│   ├── know-your-data/
+│   │   └── SKILL.md
+│   └── poc-builder/
+│       ├── SKILL.md
+│       └── references/
+│           ├── ACCOUNT_DISCOVERY.md
+│           ├── BUILD_SUMMARY_TEMPLATE.md
+│           ├── GUIDE_PARSING.md
+│           ├── KNOWN_GOTCHAS.md
+│           └── TEACHING_PATTERNS.md
+├── recipes/
+│   ├── by-role/             # prompts organized by job role
+│   ├── connect-sources/
+│   ├── build-pipelines/
+│   ├── monitor-quality/
+│   ├── optimize-costs/
+│   ├── secure-and-govern/
+│   ├── assess-change-impact/
+│   ├── self-serve-analytics/
+│   ├── ai-enrichment/
+│   └── README.md
+├── AGENTS.md                # agent contribution guide
+└── install.sh
+```
 
 ## What Are Cortex Code Skills?
 
@@ -40,11 +78,11 @@ Skills are markdown-based workflow definitions that teach Cortex Code how to per
 ./install.sh
 ```
 
-### Skills only or prompts only
+### Skills only or recipes only
 
 ```bash
 ./install.sh skills    # skills only
-./install.sh prompts   # prompts only
+./install.sh recipes   # recipes only
 ```
 
 ### Per-project install
@@ -72,30 +110,6 @@ $dbt-model-generator
 Or simply describe what you need — Cortex Code will match your request to the right skill based on trigger phrases.
 
 For prompts, just paste them directly into Cortex Code CLI. See each prompt file for the copy-paste block and customization tips.
-
-## dbt-model-generator
-
-Automates the full "shift left" data modeling workflow:
-
-1. **Discover** raw tables in a Snowflake database/schema
-2. **Profile** column types, cardinality, relationships
-3. **Classify** columns into facts, dimensions, and measures
-4. **Generate** dbt models (staging, dimensions, facts) with surrogate keys
-5. **Test** with schema.yml (unique, not_null, relationships, accepted_values)
-6. **Validate** via `dbt parse`
-7. **Submit** a GitHub PR with star schema diagram, profiling stats, and classification rationale
-
-### Parameters
-
-| Parameter | Required | Description |
-|---|---|---|
-| `SOURCE_DATABASE` | Yes | Snowflake database with raw tables |
-| `SOURCE_SCHEMA` | Yes | Schema to scan (or `*` for all) |
-| `SOURCE_TABLE` | No | Specific table (default: all in schema) |
-| `GITHUB_REPO` | No | GitHub repo for PR (`owner/repo`) |
-| `PROJECT_NAME` | No | dbt project name |
-| `WAREHOUSE` | No | Snowflake warehouse (default: `COMPUTE_WH`) |
-| `ROLE` | No | Snowflake role (default: `SYSADMIN`) |
 
 ## Contributing
 
