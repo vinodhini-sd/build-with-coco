@@ -26,6 +26,6 @@ NULL rates, freshness, and duplicates. Show me the DMF definitions and how to qu
 
 ## Tips
 
-- Replace `PROD.CORE.FACT_SALES` and column names with your table
+- Replace `{{database}}.{{schema}}.{{table}}` and column names with your table
 - Add "set up a Snowflake Task to alert me via email when checks fail" for notifications
 - Say "recommend what I should monitor" if you're unsure which checks to add

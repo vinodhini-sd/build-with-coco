@@ -31,4 +31,4 @@ summary at the end.
 
 - Add "include serverless costs too" to cover Cortex, tasks, and pipes
 - Replace "this month" with "last 90 days" for a broader trend view
-- Add "export findings to a Google Sheet" if you want a shareable artifact
+- Add "save findings to a Snowflake table" or "export results to a CSV file" if you want a shareable artifact

@@ -23,7 +23,7 @@ generate a summary report with estimated migration effort.
 
 - SQL files in a local directory
 - SnowConvert available (or CoCo will guide installation)
-- Files should be valid Teradata SQL
+- Files should be valid SQL from a supported source platform: Teradata, Oracle, or SQL Server
 
 ## Tips
 

@@ -114,6 +114,45 @@ Each `by-role/<role>/prompts.md` has 10-15 numbered prompts for a persona. Not a
 4. Add an entry to `recipes/README.md` catalog table
 5. Add an entry to the root `README.md` scenario table
 
+## Hooks
+
+Hooks are shell or Python scripts that run on Cortex Code lifecycle events — session start, errors, tab title updates, etc. They live in `hooks/` and are optional; CoCo works without them.
+
+### Directory structure
+
+```
+hooks/
+├── session-start.sh        ← runs when a CoCo session begins (sets context, prints env info)
+├── check-errors.py         ← scans recent output for Snowflake errors, prints remediation hints
+├── set-tab-title.sh        ← sets the terminal tab title from session metadata
+├── tab-title-helper.py     ← extracts title from session files; used by set-tab-title.sh
+├── whats-new-helper.py     ← summarizes recent changelog entries on session start
+└── README.md               ← documents each hook and required env vars
+```
+
+### Rules
+
+- Shell hooks (`.sh`) must be executable: `chmod +x hooks/<hook>.sh`
+- Hooks read configuration from environment variables — no hardcoded credentials or paths
+- Document every env var a hook reads in `hooks/README.md`
+- Keep hooks lightweight — they run on every lifecycle event
+
+### Adding a hook
+
+1. Create `hooks/<hook-name>.sh` or `hooks/<hook-name>.py`
+2. If `.sh`, make it executable: `chmod +x hooks/<hook-name>.sh`
+3. Add an entry to `hooks/README.md` documenting what it does and any env vars it needs
+4. Wire it up in your CoCo config or `install.sh` as appropriate
+
+### Install
+
+Hooks are included in the standard installer:
+
+```bash
+./install.sh hooks    # hooks only
+./install.sh          # everything (skills + recipes + hooks)
+```
+
 ## Naming conventions
 
 - **Directories:** `kebab-case` only — no underscores, no spaces, no uppercase
@@ -133,6 +172,32 @@ Each `by-role/<role>/prompts.md` has 10-15 numbered prompts for a persona. Not a
 Skills land in `~/.snowflake/cortex/skills/<skill-name>/`
 Recipes land in `~/.snowflake/cortex/recipes/`
 
+## Git workflow
+
+This is a public repo — changes are visible to the community.
+
+- **Never commit directly to `main`.** Always work on a feature branch.
+- **Branch naming:** `feature/<description>` or `fix/<description>`
+- **Create a PR, don't merge directly.** A human reviewer approves first.
+- After opening the PR, stop — do not auto-merge.
+
+```bash
+git checkout -b feature/add-new-skill
+# ... make changes ...
+git push origin feature/add-new-skill
+# open a PR on GitHub
+```
+
+## Keeping docs in sync
+
+When making changes, update all relevant docs in the same commit/PR:
+
+- **Adding a skill:** update the skills table in `README.md`
+- **Adding a recipe:** update `recipes/README.md` catalog table AND the scenario table in `README.md`
+- **Adding a hook:** update `hooks/README.md`
+- **Any notable change:** add an entry to `CHANGELOG.md`
+- **Changing repo structure:** update the tree in both `README.md` and `AGENTS.md`
+
 ## Repo layout
 
 ```
@@ -142,7 +207,8 @@ build-with-coco/
 ├── README.md          ← human-facing index
 ├── install.sh         ← installer
 ├── skills/            ← CoCo skill automations
-└── recipes/           ← copy-paste workflow prompts
-    ├── by-role/       ← persona cheat sheets (10-15 prompts per role)
-    └── <use-case>/    ← scenario-based single-workflow recipes
+├── recipes/           ← copy-paste workflow prompts
+│   ├── by-role/       ← persona cheat sheets (10-15 prompts per role)
+│   └── <use-case>/    ← scenario-based single-workflow recipes
+└── hooks/             ← optional session lifecycle scripts
 ```

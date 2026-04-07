@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# install.sh — Install skills and/or recipes from build-with-coco
+# install.sh — Install skills, recipes, and/or hooks from build-with-coco
 #
 # Usage:
-#   ./install.sh              # Install everything (skills + recipes)
+#   ./install.sh              # Install everything (skills + recipes + hooks)
 #   ./install.sh skills       # Install skills only
 #   ./install.sh recipes      # Install recipes only
+#   ./install.sh hooks        # Install hooks only
 #   ./install.sh --project    # Install into current project (.cortex/) instead of global
 
 set -euo pipefail
@@ -29,6 +30,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_SRC="${SCRIPT_DIR}/skills"
 PROMPTS_SRC="${SCRIPT_DIR}/recipes"
+HOOKS_SRC="${SCRIPT_DIR}/hooks"
 
 installed=0
 
@@ -46,7 +48,7 @@ install_skills() {
     skill_name="$(basename "$skill_dir")"
     cp -r "$skill_dir" "$dest/$skill_name"
     echo "  ✓ $skill_name"
-    ((installed++))
+    (( ++installed ))
   done
 }
 
@@ -77,6 +79,22 @@ install_recipes() {
   fi
 }
 
+install_hooks() {
+  if [[ ! -d "$HOOKS_SRC" ]]; then
+    echo "⚠ No hooks/ directory found — skipping hooks"
+    return
+  fi
+
+  local dest="${GLOBAL_DIR}/hooks"
+  mkdir -p "$dest"
+
+  cp -r "$HOOKS_SRC"/. "$dest/"
+  local count
+  count=$(find "$dest" -maxdepth 1 -type f | wc -l | tr -d ' ')
+  echo "  ✓ hooks ($count files)"
+  (( installed += count ))
+}
+
 echo ""
 echo "build-with-coco installer"
 echo "========================="
@@ -96,12 +114,19 @@ case "$INSTALL_TARGET" in
     echo "Installing recipes..."
     install_recipes
     ;;
+  hooks)
+    echo "Installing hooks..."
+    install_hooks
+    ;;
   all|*)
     echo "Installing skills..."
     install_skills
     echo ""
     echo "Installing recipes..."
     install_recipes
+    echo ""
+    echo "Installing hooks..."
+    install_hooks
     ;;
 esac
 
@@ -110,3 +135,4 @@ echo "Done — $installed items installed to $GLOBAL_DIR/"
 echo ""
 echo "Skills: invoke with \$skill-name in Cortex Code"
 echo "Recipes: copy-paste from $GLOBAL_DIR/recipes/ or browse the catalog in recipes/README.md"
+echo "Hooks: installed to $GLOBAL_DIR/hooks/ — configure in your Cortex Code settings"
