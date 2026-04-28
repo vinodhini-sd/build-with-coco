@@ -11,6 +11,7 @@ A collection of reusable [Cortex Code](https://docs.snowflake.com/en/user-guide/
 | [know-your-data](skills/know-your-data/SKILL.md) | Discover data you already have access to in a Snowflake account, understand what it contains, and map it to your roles | "know your data", "know my data", "find data", "data discovery", "what can I access", "explore account" |
 | [poc-builder](skills/poc-builder/SKILL.md) | Go from zero to a working POC with any Snowflake guide, blog post, doc link, or topic name. Deep-dives the content, extracts a demo spec, finds matching data in your account, and builds a working POC interactively | "poc builder", "build this", "zero to poc", "try this", "teach me", "walk me through", "prototype this", "run this guide" |
 | [aws-glue-iceberg-setup](skills/aws-glue-iceberg-setup/SKILL.md) | Set up AWS Glue as an Iceberg catalog for Snowflake — crawl S3 data, register tables, configure external volumes, and query via Iceberg | "glue iceberg", "aws glue setup", "iceberg from s3", "external catalog", "glue crawler" |
+| [data-quality-suite](skills/data-quality-suite/SKILL.md) | Multi-framework DQ suite — set up quality checks, monitoring, and pipeline gates across Snowflake DMFs, dbt, Great Expectations, Soda Core, Snowpark, and PySpark. Fork `customer-config.md` to customize for your team | "data quality", "quality checks", "quality gates", "dbt tests", "soda checks", "great expectations", "dq suite" |
 
 ## Recipes
 
@@ -22,7 +23,7 @@ Copy-paste prompts in two categories — browse by role or by scenario. Full cat
 |---|---|
 | **Connect sources** | [openflow-postgres-replication](recipes/connect-sources/openflow-postgres-replication.md), [iceberg-external-catalog](recipes/connect-sources/iceberg-external-catalog.md) |
 | **Build pipelines** | [dbt-health-check-and-deploy](recipes/build-pipelines/dbt-health-check-and-deploy.md), [dynamic-table-pipeline](recipes/build-pipelines/dynamic-table-pipeline.md) |
-| **Monitor quality** | [data-quality-monitoring](recipes/monitor-quality/data-quality-monitoring.md) |
+| **Monitor quality** | [data-quality-monitoring](recipes/monitor-quality/data-quality-monitoring.md), [data-quality-suite-setup](recipes/monitor-quality/data-quality-suite-setup.md) |
 | **Optimize costs** | [full-cost-governance-audit](recipes/optimize-costs/full-cost-governance-audit.md), [cost-optimization-sprint](recipes/optimize-costs/cost-optimization-sprint.md) |
 | **Secure & govern** | [governance-hardening](recipes/secure-and-govern/governance-hardening.md), [network-security-lockdown](recipes/secure-and-govern/network-security-lockdown.md) |
 | **Assess change impact** | [lineage-impact-analysis](recipes/assess-change-impact/lineage-impact-analysis.md), [migration-assessment](recipes/assess-change-impact/migration-assessment.md) |

@@ -1,0 +1,122 @@
+# Soda Core Checks Template
+# Replace {{placeholder}} values before running.
+# Install: pip install soda-core-{{connector}}
+# Run: soda scan -d {{datasource_name}} -c soda_datasource.yml soda_checks_{{table_name}}.yml
+
+# ============================================================
+# Datasource connection config — save as soda_datasource.yml
+# Credentials MUST use ${ENV_VAR} format — never hardcode.
+# ============================================================
+# data_source {{datasource_name}}:
+#   type: snowflake                          # or postgres, bigquery, spark_df, etc.
+#   account: ${SNOWFLAKE_ACCOUNT}
+#   user: ${SNOWFLAKE_USER}
+#   password: ${SNOWFLAKE_PASSWORD}          # or use private_key_path
+#   database: {{database}}
+#   schema: {{schema}}
+#   warehouse: {{warehouse}}
+#   role: {{role}}
+
+# ============================================================
+# Checks file — save as soda_checks_{{table_name}}.yml
+# ============================================================
+
+checks for {{table_name}}:
+
+  # ── TABLE-LEVEL CHECKS ─────────────────────────────────────
+
+  # Table must not be empty
+  - row_count > 0
+
+  # Row count drop alert (Soda Cloud feature — requires SodaCL)
+  # Uncomment if using Soda Cloud:
+  # - change is between -20% and +300% for row_count
+
+  # Schema must match expected structure
+  - schema:
+      name: Expected schema for {{table_name}}
+      warn:
+        when wrong column type:
+          {{col1}}: varchar
+          {{col2}}: number
+          {{timestamp_column}}: timestamp_ntz
+      fail:
+        when required column missing:
+          - {{pk_column}}
+          - {{required_column}}
+
+  # ── PRIMARY KEY: null + duplicate checks ───────────────────
+
+  - missing_count({{pk_column}}) = 0:
+      name: No nulls in primary key
+      fail: when > 0
+
+  - duplicate_count({{pk_column}}) = 0:
+      name: No duplicate primary keys
+      fail: when > 0
+
+  # ── REQUIRED COLUMNS: null checks ──────────────────────────
+
+  # Repeat this block for each required (non-nullable) column
+  - missing_count({{required_column}}) = 0:
+      name: No nulls in {{required_column}}
+      fail: when > 0
+
+  - missing_percent({{fk_column}}) < 1%:
+      name: FK column has acceptable null rate
+      warn: when between 0.1% and 1%
+      fail: when > 1%
+
+  # ── CATEGORICAL / STATUS COLUMN ────────────────────────────
+
+  - missing_count({{status_column}}) = 0
+
+  - invalid_count({{status_column}}) = 0:
+      name: Status column only contains valid values
+      valid values:
+        - "{{value_1}}"
+        - "{{value_2}}"
+        - "{{value_3}}"
+      fail: when > 0
+
+  # ── NUMERIC METRIC COLUMN ──────────────────────────────────
+
+  - missing_count({{metric_column}}) = 0
+
+  - min({{metric_column}}) >= 0:
+      name: Metric column has no negative values
+      fail: when < 0
+
+  # Distribution bounds (warn on drift, fail on extreme drift)
+  - avg({{metric_column}}) between {{mean_min}} and {{mean_max}}:
+      name: Metric mean within expected range
+      warn: when not between {{warn_mean_min}} and {{warn_mean_max}}
+      fail: when not between {{fail_mean_min}} and {{fail_mean_max}}
+
+  # ── FRESHNESS CHECK ─────────────────────────────────────────
+
+  - freshness({{timestamp_column}}) < {{max_age_hours}}h:
+      name: Table freshness — data must be < {{max_age_hours}} hours old
+      warn: when > {{warn_age_hours}}h
+      fail: when > {{max_age_hours}}h
+
+  # ── BUSINESS RULE: CUSTOM SQL CHECK ─────────────────────────
+
+  # Add org-specific rules here using SQL
+  # Zero rows returned = check passes (rows returned = check fails)
+  - failed rows:
+      name: "{{business_rule_name}}"
+      fail query: |
+        SELECT *
+        FROM {{table_name}}
+        WHERE {{business_rule_sql_condition}}
+      fail: when > 0
+
+  # Example business rule:
+  # - failed rows:
+  #     name: "Revenue must be positive for completed orders"
+  #     fail query: |
+  #       SELECT *
+  #       FROM orders
+  #       WHERE status = 'completed' AND revenue <= 0
+  #     fail: when > 0

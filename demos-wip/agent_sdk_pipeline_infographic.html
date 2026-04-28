@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Broken Pipelines to Self-Healing Pipelines — Cortex Code Agent SDK</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    line-height: 1.5;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 60%, #1c2333 100%);
+    border-bottom: 1px solid #30363d;
+    padding: 60px 40px 50px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(29, 78, 216, 0.15);
+    border: 1px solid rgba(29, 78, 216, 0.4);
+    color: #60a5fa;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #e6edf3 0%, #60a5fa 50%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 17px;
+    color: #8b949e;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+
+  /* ── SECTION LABELS ── */
+  .section { padding: 60px 40px; }
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .section-label .pill {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .pill-before { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .pill-after  { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .pill-sdk    { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+  .section-label .divider { flex: 1; height: 1px; background: #21262d; }
+
+  /* ── BEFORE SECTION ── */
+  .before-section { background: #0d1117; border-bottom: 1px solid #21262d; }
+
+  .before-headline {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .before-headline h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f87171;
+    margin-bottom: 8px;
+  }
+  .before-headline p { color: #8b949e; font-size: 15px; }
+
+  /* Timeline */
+  .timeline { position: relative; max-width: 860px; margin: 0 auto; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #ef444440, #ef4444, #ef444440);
+    transform: translateX(-50%);
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .timeline-item.left  { flex-direction: row-reverse; }
+  .timeline-item.right { flex-direction: row; }
+
+  .timeline-dot {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    z-index: 2;
+    border: 2px solid #0d1117;
+  }
+  .dot-red    { background: #7f1d1d; border-color: #ef4444; }
+  .dot-orange { background: #7c2d12; border-color: #f97316; }
+  .dot-yellow { background: #713f12; border-color: #eab308; }
+
+  .timeline-card {
+    width: calc(50% - 36px);
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .timeline-item.left  .timeline-card { margin-right: 54px; }
+  .timeline-item.right .timeline-card { margin-left: 54px; }
+
+  .timeline-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: #f87171;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .timeline-card h4 { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 4px; }
+  .timeline-card p  { font-size: 13px; color: #8b949e; }
+
+  .before-cost {
+    max-width: 860px;
+    margin: 40px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .cost-card {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .cost-card .cost-num { font-size: 32px; font-weight: 800; color: #f87171; }
+  .cost-card .cost-label { font-size: 13px; color: #8b949e; margin-top: 4px; }
+
+  /* ── SDK LAYER ── */
+  .sdk-section {
+    background: linear-gradient(180deg, #0d1117 0%, #13111c 50%, #0d1117 100%);
+    border-top: 1px solid #21262d;
+    border-bottom: 1px solid #21262d;
+    padding: 60px 40px;
+  }
+  .sdk-headline {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .sdk-headline h2 {
+    font-size: 28px; font-weight: 700;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .sdk-headline p { color: #8b949e; font-size: 15px; }
+
+  .sdk-integration {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: center;
+  }
+  .sdk-airflow {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .sdk-airflow h4 { font-size: 13px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .code-block {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .code-comment { color: #6e7681; }
+  .code-keyword { color: #ff7b72; }
+  .code-string  { color: #a5d6ff; }
+  .code-func    { color: #d2a8ff; }
+  .code-var     { color: #ffa657; }
+
+  .sdk-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #7c3aed;
+  }
+
+  .sdk-box {
+    background: linear-gradient(135deg, #1a1033, #0f1629);
+    border: 2px solid #7c3aed;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
+  }
+  .sdk-box h4 { font-size: 13px; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .tool-chip {
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #c4b5fd;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tool-chip .icon { font-size: 14px; }
+
+  .sdk-tagline {
+    text-align: center;
+    font-size: 12px;
+    color: #6e7681;
+    font-style: italic;
+    padding-top: 10px;
+    border-top: 1px solid #21262d;
+  }
+
+  /* ── AFTER SECTION ── */
+  .after-section { background: #0d1117; padding: 60px 40px; }
+
+  .after-headline {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .after-headline h2 { font-size: 28px; font-weight: 700; color: #4ade80; margin-bottom: 8px; }
+  .after-headline p { color: #8b949e; font-size: 15px; }
+
+  /* Agent loop */
+  .agent-loop {
+    max-width: 960px;
+    margin: 0 auto 48px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    align-items: start;
+  }
+  .loop-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+  .loop-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 22px;
+    font-size: 20px;
+    color: #30363d;
+    z-index: 1;
+  }
+  .loop-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .icon-trigger  { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3); }
+  .icon-read     { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); }
+  .icon-reason   { background: rgba(167,139,250,0.12);border: 1px solid rgba(167,139,250,0.3); }
+  .icon-fix      { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
+  .icon-notify   { background: rgba(34,197,94,0.12);  border: 1px solid rgba(34,197,94,0.3); }
+
+  .loop-step h4 { font-size: 12px; font-weight: 600; color: #e6edf3; margin-bottom: 4px; }
+  .loop-step p  { font-size: 11px; color: #6e7681; line-height: 1.4; padding: 0 4px; }
+
+  /* Agent output mock */
+  .agent-output-container {
+    max-width: 860px;
+    margin: 0 auto 48px;
+  }
+  .agent-output-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #4ade80;
+    margin-bottom: 10px;
+  }
+  .agent-output {
+    background: #0d1117;
+    border: 1px solid #238636;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .agent-output-header {
+    background: #161b22;
+    border-bottom: 1px solid #21262d;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .agent-output-header .dot-row { display: flex; gap: 6px; }
+  .agent-output-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .d-red { background: #ef4444; } .d-yellow { background: #eab308; } .d-green { background: #22c55e; }
+  .agent-output-header .filename { font-size: 12px; color: #8b949e; margin-left: 8px; font-family: monospace; }
+  .agent-output-body { padding: 20px 24px; font-size: 13px; line-height: 1.8; }
+
+  .agent-step-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #21262d;
+  }
+  .agent-step-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .step-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  .step-text { flex: 1; }
+  .step-text .step-label { font-size: 11px; font-weight: 600; color: #6e7681; text-transform: uppercase; letter-spacing: 1px; }
+  .step-text .step-content { color: #e6edf3; font-size: 13px; }
+  .step-text .step-content code {
+    font-family: monospace; background: #21262d; padding: 1px 5px;
+    border-radius: 4px; font-size: 12px; color: #a5d6ff;
+  }
+  .step-text .step-content .highlight { color: #4ade80; font-weight: 600; }
+  .step-text .step-content .warning   { color: #f87171; font-weight: 600; }
+
+  /* After costs */
+  .after-cost {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .after-card {
+    background: rgba(34, 197, 94, 0.05);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .after-card .after-num { font-size: 32px; font-weight: 800; color: #4ade80; }
+  .after-card .after-label { font-size: 13px; color: #8b949e; margin-top: 4px; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-section {
+    background: #161b22;
+    border-top: 1px solid #21262d;
+    padding: 60px 40px;
+  }
+  .compare-headline {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .compare-headline h2 { font-size: 24px; font-weight: 700; color: #e6edf3; }
+
+  .compare-table {
+    max-width: 860px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+  }
+  .compare-table table { width: 100%; border-collapse: collapse; }
+  .compare-table th {
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #0d1117;
+  }
+  .compare-table th:first-child { color: #8b949e; text-align: left; }
+  .compare-table th.before-col { color: #f87171; text-align: center; background: rgba(239,68,68,0.05); }
+  .compare-table th.after-col  { color: #4ade80; text-align: center; background: rgba(34,197,94,0.05); }
+
+  .compare-table td {
+    padding: 12px 20px;
+    font-size: 13px;
+    border-top: 1px solid #21262d;
+  }
+  .compare-table td:first-child { color: #8b949e; font-weight: 500; }
+  .compare-table td.before-val { text-align: center; color: #f87171; background: rgba(239,68,68,0.03); }
+  .compare-table td.after-val  { text-align: center; color: #4ade80; background: rgba(34,197,94,0.03); }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: #0d1117;
+    border-top: 1px solid #21262d;
+    padding: 32px 40px;
+    text-align: center;
+  }
+  .footer .sdk-pill {
+    display: inline-block;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.4);
+    color: #a78bfa;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .footer p { font-size: 13px; color: #6e7681; }
+  .footer code {
+    font-family: monospace;
+    background: #161b22;
+    border: 1px solid #30363d;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #a5d6ff;
+    font-size: 12px;
+  }
+
+  /* ── DIVIDER BANNER ── */
+  .divider-banner {
+    background: linear-gradient(90deg, #0d1117 0%, #1a1033 30%, #0f1629 60%, #0d1117 100%);
+    border-top: 1px solid #21262d;
+    border-bottom: 1px solid #21262d;
+    padding: 20px 40px;
+    text-align: center;
+  }
+  .divider-banner p {
+    font-size: 15px;
+    color: #a78bfa;
+    font-style: italic;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-badge">Cortex Code Agent SDK</div>
+  <h1>From Broken Pipelines<br>to Self-Healing Pipelines</h1>
+  <p>How autonomous agents transform reactive on-call firefighting into intelligent, headless pipeline debugging and repair.</p>
+</div>
+
+<!-- ══════════════════════════════════════ BEFORE ══════════════════════════════════════ -->
+<div class="before-section section">
+  <div style="max-width:1120px;margin:0 auto">
+
+    <div class="section-label">
+      <span class="pill pill-before">Before Agent SDK</span>
+      <div class="divider"></div>
+    </div>
+
+    <div class="before-headline">
+      <h2>3am. PagerDuty fires. You're the engineer on call.</h2>
+      <p>Every step requires a human. Every tool requires context-switching. Every minute costs trust.</p>
+    </div>
+
+    <div class="timeline">
+
+      <div class="timeline-item right">
+        <div class="timeline-dot dot-red" style="top:8px">🔔</div>
+        <div class="timeline-card">
+          <div class="timeline-time">3:04 AM</div>
+          <h4>Alert fires</h4>
+          <p>Airflow marks <code style="font-size:11px;background:#0d1117;padding:1px 4px;border-radius:3px;color:#f87171">stg_orders</code> FAILED. PagerDuty wakes you up. No context. No diagnosis. Just a task name and an exit code.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot dot-orange" style="top:8px">🔍</div>
+        <div class="timeline-card">
+          <div class="timeline-time">3:11 AM</div>
+          <h4>Log archaeology begins</h4>
+          <p>Open Airflow UI → navigate to the failed task → read raw logs. Error is cryptic: <em>"KeyError: customer_id"</em>. Doesn't tell you why.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot dot-orange" style="top:8px">🗄️</div>
+        <div class="timeline-card">
+          <div class="timeline-time">3:19 AM</div>
+          <h4>Switch to Snowflake</h4>
+          <p>Open a new browser tab. Log in. Manually query <code style="font-size:11px;background:#0d1117;padding:1px 4px;border-radius:3px;color:#a5d6ff">INFORMATION_SCHEMA</code> to check if the column still exists. It's gone. When? By whom?</p>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot dot-orange" style="top:8px">📜</div>
+        <div class="timeline-card">
+          <div class="timeline-time">3:28 AM</div>
+          <h4>Git blame hunt</h4>
+          <p>Clone the dbt repo. Run <code style="font-size:11px;background:#0d1117;padding:1px 4px;border-radius:3px;color:#a5d6ff">git log</code>. Find the migration PR from 6 hours ago. Nobody updated the staging model.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item right">
+        <div class="timeline-dot dot-yellow" style="top:8px">✏️</div>
+        <div class="timeline-card">
+          <div class="timeline-time">3:41 AM</div>
+          <h4>Manual fix</h4>
+          <p>Update the staging model. Run <code style="font-size:11px;background:#0d1117;padding:1px 4px;border-radius:3px;color:#a5d6ff">dbt run</code>. It works. Push the fix. Create a PR. Write an incident note. Go back to sleep.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item left">
+        <div class="timeline-dot dot-red" style="top:8px">🔁</div>
+        <div class="timeline-card">
+          <div class="timeline-time">Next week</div>
+          <h4>Same failure. Same process.</h4>
+          <p>Different column. Different model. Same 40-minute manual triage loop. The pipeline has no memory. It cannot learn. Neither approach changes.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="before-cost">
+      <div class="cost-card">
+        <div class="cost-num">40 min</div>
+        <div class="cost-label">avg. triage time per incident</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-num">4 tools</div>
+        <div class="cost-label">Airflow · Snowflake · GitHub · Slack — manually</div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-num">0 context</div>
+        <div class="cost-label">alert has no diagnosis, no root cause, no fix</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ DIVIDER ══════════════════════════════════════ -->
+<div class="divider-banner">
+  <p>What if the pipeline could investigate itself — and fix itself — before you even wake up?</p>
+</div>
+
+<!-- ══════════════════════════════════════ SDK LAYER ══════════════════════════════════════ -->
+<div class="sdk-section">
+  <div style="max-width:1120px;margin:0 auto">
+
+    <div class="section-label" style="justify-content:center">
+      <span class="pill pill-sdk">Enter: Cortex Code Agent SDK</span>
+    </div>
+
+    <div class="sdk-headline">
+      <h2>One on_failure_callback. One agent. All four tools — simultaneously.</h2>
+      <p>The SDK embeds CoCo's governed agent loop headlessly into your pipeline. Airflow triggers it. The agent does the rest.</p>
+    </div>
+
+    <div class="sdk-integration">
+
+      <!-- Airflow side -->
+      <div class="sdk-airflow">
+        <h4>Airflow DAG</h4>
+        <div class="code-block">
+<span class="code-comment"># Your existing pipeline</span>
+<span class="code-keyword">def</span> <span class="code-func">on_failure_callback</span>(context):
+    dag_id  = context[<span class="code-string">"dag"</span>].dag_id
+    task_id = context[<span class="code-string">"task_instance"</span>].task_id
+    log_url = context[<span class="code-string">"task_instance"</span>].log_url
+
+    <span class="code-comment"># 👇 This replaces your manual triage</span>
+    <span class="code-func">asyncio.run</span>(
+        <span class="code-func">run_triage_agent</span>(
+            dag_id, task_id, log_url
+        )
+    )
+
+<span class="code-var">load_orders</span> = SnowflakeOperator(
+    task_id=<span class="code-string">"load_orders"</span>,
+    sql=LOAD_SQL,
+    <span class="code-var">on_failure_callback</span>=on_failure_callback
+)</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="sdk-arrow">⚡</div>
+
+      <!-- SDK box -->
+      <div class="sdk-box">
+        <h4>Cortex Code Agent SDK</h4>
+        <div class="tool-grid">
+          <div class="tool-chip"><span class="icon">🗄️</span> SQL Tool</div>
+          <div class="tool-chip"><span class="icon">📂</span> Read Tool</div>
+          <div class="tool-chip"><span class="icon">✏️</span> Edit Tool</div>
+          <div class="tool-chip"><span class="icon">⚙️</span> Bash Tool</div>
+          <div class="tool-chip"><span class="icon">🔍</span> Grep Tool</div>
+          <div class="tool-chip"><span class="icon">🌐</span> Glob Tool</div>
+        </div>
+        <div class="code-block" style="margin-bottom:10px">
+<span class="code-keyword">async for</span> msg <span class="code-keyword">in</span> <span class="code-func">query</span>(
+  prompt=<span class="code-string">f"""
+  Pipeline failed: {task_id}
+  Investigate root cause.
+  Check schema changes, logs,
+  dbt models. Apply the fix.
+  Post diagnosis to Slack.
+  """</span>,
+  options=<span class="code-func">CortexCodeAgentOptions</span>(
+    cwd=<span class="code-string">"/dbt-project"</span>,
+    connection=<span class="code-string">"snowflake-prod"</span>
+  )
+):
+    ...</div>
+        <div class="sdk-tagline">Reads logs · Queries Snowflake · Edits dbt files · Opens PR · Notifies Slack</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ AFTER ══════════════════════════════════════ -->
+<div class="after-section">
+  <div style="max-width:1120px;margin:0 auto">
+
+    <div class="section-label">
+      <span class="pill pill-after">After Agent SDK</span>
+      <div class="divider"></div>
+    </div>
+
+    <div class="after-headline">
+      <h2>Pipeline fails at 3am. Engineer sleeps until 9am.</h2>
+      <p>The agent investigated, diagnosed, fixed, and notified — autonomously. You wake up to a PR and a Slack message.</p>
+    </div>
+
+    <!-- Agent loop steps -->
+    <div class="agent-loop">
+      <div class="loop-step">
+        <div class="loop-icon icon-trigger">🔔</div>
+        <h4>Failure Detected</h4>
+        <p>Airflow on_failure_callback triggers Agent SDK script</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-icon icon-read">🔍</div>
+        <h4>Multi-Source Read</h4>
+        <p>Reads task logs, queries TASK_HISTORY, checks INFORMATION_SCHEMA</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-icon icon-reason">🧠</div>
+        <h4>Root Cause</h4>
+        <p>Correlates schema drift + code + git history across all sources</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-icon icon-fix">🔧</div>
+        <h4>Auto Fix</h4>
+        <p>Edits the dbt model, runs dbt test, commits and opens a PR</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-icon icon-notify">✅</div>
+        <h4>Structured Alert</h4>
+        <p>Posts diagnosis + PR link to Slack. Engineer reviews at 9am.</p>
+      </div>
+    </div>
+
+    <!-- Agent output mock -->
+    <div class="agent-output-container">
+      <div class="agent-output-label">Agent output — what you wake up to in Slack</div>
+      <div class="agent-output">
+        <div class="agent-output-header">
+          <div class="dot-row">
+            <div class="dot d-red"></div>
+            <div class="dot d-yellow"></div>
+            <div class="dot d-green"></div>
+          </div>
+          <span class="filename">#data-alerts · pipeline-triage-agent · 3:07 AM</span>
+        </div>
+        <div class="agent-output-body">
+
+          <div class="agent-step-row">
+            <div class="step-icon">🔍</div>
+            <div class="step-text">
+              <div class="step-label">Investigated</div>
+              <div class="step-content">Queried <code>TASK_HISTORY</code> and <code>QUERY_HISTORY</code> for task <code>stg_orders</code>. Error: <span class="warning">KeyError: customer_id</span> in <code>models/staging/stg_orders.sql:47</code></div>
+            </div>
+          </div>
+
+          <div class="agent-step-row">
+            <div class="step-icon">🗄️</div>
+            <div class="step-text">
+              <div class="step-label">Schema Check</div>
+              <div class="step-content">Column <code>customer_id</code> <span class="warning">no longer exists</span> in <code>RAW.ORDERS</code>. Dropped at <code>21:14 UTC</code> — 5h 53m before pipeline failure. Replaced by <code>order_user_id</code>.</div>
+            </div>
+          </div>
+
+          <div class="agent-step-row">
+            <div class="step-icon">📜</div>
+            <div class="step-text">
+              <div class="step-label">Root Cause</div>
+              <div class="step-content">Migration PR <code>#847</code> (merged 21:09 UTC) renamed the column. Staging model was not updated. <span class="warning">3 downstream dbt models affected</span>: <code>stg_orders</code>, <code>fct_revenue</code>, <code>dim_customers</code>.</div>
+            </div>
+          </div>
+
+          <div class="agent-step-row">
+            <div class="step-icon">🔧</div>
+            <div class="step-text">
+              <div class="step-label">Fix Applied</div>
+              <div class="step-content">Updated <code>customer_id → order_user_id</code> in all 3 models. Ran <code>dbt test</code> — <span class="highlight">all tests pass</span>. Committed to branch <code>fix/stg-orders-column-rename</code>.</div>
+            </div>
+          </div>
+
+          <div class="agent-step-row">
+            <div class="step-icon">✅</div>
+            <div class="step-text">
+              <div class="step-label">Action Required</div>
+              <div class="step-content"><span class="highlight">PR opened: #851</span> — ready for your review. Pipeline can be re-triggered after merge. No data loss detected. Estimated rerun time: ~4 minutes.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- After metrics -->
+    <div class="after-cost">
+      <div class="after-card">
+        <div class="after-num">3 min</div>
+        <div class="after-label">agent triage + fix time</div>
+      </div>
+      <div class="after-card">
+        <div class="after-num">0 tools</div>
+        <div class="after-label">opened manually — agent used them all</div>
+      </div>
+      <div class="after-card">
+        <div class="after-num">1 PR</div>
+        <div class="after-label">ready to review when you wake up</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ COMPARISON ══════════════════════════════════════ -->
+<div class="compare-section">
+  <div style="max-width:1120px;margin:0 auto">
+
+    <div class="compare-headline">
+      <h2>Side by side</h2>
+    </div>
+
+    <div class="compare-table">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th class="before-col">Before — Airflow + Alerts</th>
+            <th class="after-col">After — Agent SDK</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Failure notification</td>
+            <td class="before-val">Task name + exit code</td>
+            <td class="after-val">Root cause + impacted models + fix</td>
+          </tr>
+          <tr>
+            <td>Who investigates</td>
+            <td class="before-val">On-call engineer, manually</td>
+            <td class="after-val">Agent, autonomously</td>
+          </tr>
+          <tr>
+            <td>Tools used</td>
+            <td class="before-val">Airflow UI · Snowflake · GitHub · Terminal</td>
+            <td class="after-val">All four — simultaneously, in one loop</td>
+          </tr>
+          <tr>
+            <td>Time to diagnosis</td>
+            <td class="before-val">25–40 minutes</td>
+            <td class="after-val">Under 3 minutes</td>
+          </tr>
+          <tr>
+            <td>Fix</td>
+            <td class="before-val">Engineer writes it manually</td>
+            <td class="after-val">Agent writes it, tests it, opens PR</td>
+          </tr>
+          <tr>
+            <td>Engineer woken up at 3am</td>
+            <td class="before-val">Yes</td>
+            <td class="after-val">No — reviews PR at 9am</td>
+          </tr>
+          <tr>
+            <td>Handles unanticipated failures</td>
+            <td class="before-val">Only what you coded for</td>
+            <td class="after-val">Yes — adapts to what it finds</td>
+          </tr>
+          <tr>
+            <td>Integration effort</td>
+            <td class="before-val">Complex custom operators + XCom</td>
+            <td class="after-val">One on_failure_callback + 10 lines</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ FOOTER ══════════════════════════════════════ -->
+<div class="footer">
+  <div class="sdk-pill">Cortex Code Agent SDK — Preview</div>
+  <p>Install: <code>pip install cortex-code-agent-sdk</code> &nbsp;|&nbsp; Requires: Cortex Code CLI + Snowflake connection</p>
+  <p style="margin-top:8px;font-size:12px;color:#484f58">The agent uses the same governed, context-aware engine as the Cortex Code CLI — SQL tool, file tools, Bash tool — running headlessly inside your pipeline infrastructure.</p>
+</div>
+
+</body>
+</html>
