@@ -27,6 +27,7 @@ Paste any prompt into Cortex Code CLI or desktop app. CoCo will ask for the spec
 | **Build pipelines** | [dbt-health-check-and-deploy](build-pipelines/dbt-health-check-and-deploy.md) | Validate, test, and deploy a dbt project to Snowflake |
 | **Build pipelines** | [dynamic-table-pipeline](build-pipelines/dynamic-table-pipeline.md) | Build a multi-layer dynamic table pipeline from raw events |
 | **Monitor quality** | [data-quality-monitoring](monitor-quality/data-quality-monitoring.md) | Set up DMF-based data quality checks with anomaly detection |
+| **Monitor quality** | [data-quality-suite-setup](monitor-quality/data-quality-suite-setup.md) | Configure a multi-framework DQ suite across DMFs, dbt, GX, Soda, Snowpark, and PySpark |
 | **Optimize costs** | [full-cost-governance-audit](optimize-costs/full-cost-governance-audit.md) | Audit top warehouse costs + unprotected tables + unclassified PII |
 | **Optimize costs** | [cost-optimization-sprint](optimize-costs/cost-optimization-sprint.md) | Find over-provisioned warehouses, spilling queries, missing clustering |
 | **Secure & govern** | [governance-hardening](secure-and-govern/governance-hardening.md) | Classify PII, apply masking policies, add row access, score maturity |

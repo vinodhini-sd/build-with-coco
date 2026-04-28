@@ -3,6 +3,31 @@
 ## [Unreleased]
 
 ### Added
+- Added `skills/data-quality-suite/` — multi-framework data quality skill:
+  - `SKILL.md` — orchestrator router for 6 frameworks (DMFs, dbt, GX, Soda, Snowpark, PySpark)
+  - `COMPASS.md` — navigation guide
+  - `customer-config.md` — single file customers fork to customize enabled frameworks, layer standards, and thresholds
+  - `workflows/dmf-monitors.md` — Snowflake DMF: profile → recommend → attach → schedule
+  - `workflows/dbt-tests.md` — dbt: classify columns → generate schema.yml → validate
+  - `workflows/gx-suite.md` — Great Expectations: datasource → suite → checkpoint → CI
+  - `workflows/soda-checks.md` — Soda Core: config → checks.yml → scan
+  - `workflows/snowpark-gates.md` — Snowpark: insert quality_gate() before each write
+  - `workflows/spark-gates.md` — PySpark: insert assert_quality() at DataFrame write points
+  - `templates/dmf_setup.sql` — DMF creation + attachment DDL
+  - `templates/dbt_schema_tests.yml` — dbt schema.yml with full test coverage
+  - `templates/gx_expectations.py` — GX expectation suite (GX >= 0.18 fluent API)
+  - `templates/soda_checks.yml` — Soda checks covering all check types
+  - `templates/snowpark_gate.py` — `quality_gate()` function for Snowpark pipelines
+  - `templates/spark_gate.py` — `assert_quality()` function for PySpark pipelines
+- Added `recipes/monitor-quality/data-quality-suite-setup.md` — multi-framework DQ setup recipe
+
+### Changed
+- Updated `README.md` — added `data-quality-suite` to skills table and Monitor quality scenario
+- Updated `recipes/README.md` — added `data-quality-suite-setup` to By Scenario table
+
+---
+
+### Added (previous)
 - Added `COMPASS.md` navigation files to all 5 skills (`poc-builder`, `dbt-model-generator`, `developer-voice`, `know-your-data`, `aws-glue-iceberg-setup`) — 25–35 line files encoding quick commands, key files, non-obvious patterns, and cross-references for each skill
 - Added `docs/COMPASS_GUIDE.md` — best practice guide for writing skill compass files, including the 4-section template, 5-question framework, freshness rules, and critic checklist
 
