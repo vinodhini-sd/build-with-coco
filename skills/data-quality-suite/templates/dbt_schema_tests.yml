@@ -1,0 +1,95 @@
+# dbt Schema Tests Template
+# Replace {{placeholder}} values before using.
+# Usage: Save as models/{{path}}/schema.yml in your dbt project.
+
+version: 2
+
+models:
+  - name: {{model_name}}
+    description: "{{model_description}}"
+    config:
+      tags: ["dq_suite"]
+
+    columns:
+      # --- PRIMARY KEY ---
+      # Copy this block for PK columns (unique identifier)
+      - name: {{pk_column}}
+        description: "Primary key — must be unique and non-null"
+        tests:
+          - not_null
+          - unique
+
+      # --- FOREIGN KEY ---
+      # Copy this block for FK columns referencing another model
+      - name: {{fk_column}}
+        description: "Foreign key to {{parent_model}}"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('{{parent_model}}')
+              field: {{parent_pk_column}}
+
+      # --- CATEGORICAL / STATUS COLUMN ---
+      # Copy this block for columns with a known set of valid values
+      - name: {{status_column}}
+        description: "Status — must be one of the defined values"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - "{{value_1}}"
+                - "{{value_2}}"
+                - "{{value_3}}"
+
+      # --- REQUIRED METRIC / NUMERIC ---
+      # Copy this block for non-null numeric columns
+      - name: {{metric_column}}
+        description: "{{metric_column}} — must be present, business-critical"
+        tests:
+          - not_null
+
+      # --- TIMESTAMP / DATE ---
+      # Copy this block for datetime columns
+      - name: {{timestamp_column}}
+        description: "Record creation timestamp"
+        tests:
+          - not_null
+
+      # --- OPTIONAL FIELD ---
+      # Skip not_null for optional columns. Add data type check if needed.
+      - name: {{optional_column}}
+        description: "Optional — may be null"
+        tests: []
+
+# ============================================================
+# SOURCE FRESHNESS (for source tables, not models)
+# Add to a separate sources.yml file alongside this file.
+# ============================================================
+
+# sources:
+#   - name: {{source_name}}
+#     database: {{database}}
+#     schema: {{schema}}
+#     tables:
+#       - name: {{table_name}}
+#         loaded_at_field: {{timestamp_column}}
+#         freshness:
+#           warn_after:
+#             count: 12
+#             period: hour
+#           error_after:
+#             count: 26
+#             period: hour
+
+# ============================================================
+# CUSTOM SINGULAR TEST EXAMPLE
+# For business rules not covered by schema tests.
+# Save as tests/{{custom_test_name}}.sql
+# ============================================================
+
+# File: tests/assert_revenue_is_positive.sql
+# SELECT *
+# FROM {{ ref('{{model_name}}') }}
+# WHERE status = 'completed'
+#   AND revenue <= 0
+# -- Returns rows that FAIL the test. Zero rows = test passes.
