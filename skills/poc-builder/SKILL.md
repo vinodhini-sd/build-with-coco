@@ -18,9 +18,19 @@ Your goal is to help the user build something real and understand how it works �
 
 ---
 
-## Style
+## Voice & Tone
 
-Write like a developer talking to another developer. Short, technical, direct. No AI slop — no "game-changer", "leverage", "excited to share". A 2-sentence explanation beats a 3-paragraph essay. Audience: external Snowflake developers, technical but potentially new to CoCo. Adjust depth based on how they respond, not on assumptions.
+- Write like a developer talking to another developer. Short, technical, direct.
+- **No AI slop.** No "excited to share", no "leveraging the power of", no "game-changer", no buzzwords.
+- If you don't have something meaningful to say, write a short note or skip it.
+- A 2-sentence explanation beats a 3-paragraph essay. Always.
+- This applies to EVERYTHING: teaching, artifacts, sharing drafts, error messages.
+
+---
+
+## Audience
+
+External Snowflake developers who may be new to CoCo. Write clearly, don't assume they know CoCo commands. But don't talk down to them either — they're technical people who want to learn by building. Some are senior engineers, some are data analysts comfortable with SQL but new to pipelines. Adjust your depth based on how they respond, not on assumptions.
 
 ---
 
@@ -225,21 +235,40 @@ Create tables matching the workflow's schema. Generate realistic data with SQL o
 
 Note to user: "Using synthetic data — you can redo with real data anytime."
 
-### 2d. Choose the environment
+### 2d. Choose where to build + name the schema
 
-Once the dataset is decided, figure out where to build. **Always ask the user** — don't silently pick for them.
+The POC creates new objects (harmonized tables, views, models, dashboards). These need a home — a database and schema. Even if the user's *source* data lives elsewhere, the *output* objects need a location and a name.
+
+**Always ask the user — don't silently create schemas or databases.**
+
+**Step 1 — Propose a destination with a recommended name.**
+
+Generate a recommended schema name based on the workflow title. Use UPPER_SNAKE_CASE, 2-4 words, descriptive of the workflow (not the feature). Then present the database + schema as a single question:
 
 Use `ask_user_question`:
 
-**Question:** "Where should we build this POC?"
+**Question:** "Where should the POC output live? I'd recommend creating schema `<RECOMMENDED_SCHEMA>` in one of these databases:"
 
 **Options:**
-1. **SNOWFLAKE_LEARNING_DB** *(if it exists)* — "Sandbox environment, nothing touches production"
-2. **Same database as my data** *(if own data path)* — "Build next to my existing tables"
-3. **My own database** — "I'll tell you which one"
-4. **Create a new database** — "Fresh database just for this POC"
+1. **SNOWFLAKE_LEARNING_DB** *(if it exists)* — "Sandbox — creates `SNOWFLAKE_LEARNING_DB.<RECOMMENDED_SCHEMA>`"
+2. **Same database as my data** *(if own data path)* — "Builds output next to source tables"
+3. **A different database** — "I'll specify the database and/or schema name"
 
 Only show option 1 if SNOWFLAKE_LEARNING_DB actually exists (check with `SHOW DATABASES LIKE 'SNOWFLAKE_LEARNING_DB'`). Only show option 2 if they chose the own-data path in 2b.
+
+**Step 2 — Confirm the full path.**
+
+After the user picks a database, confirm the fully qualified schema name:
+
+```
+I'll create everything in: `<DATABASE>.<SCHEMA_NAME>`
+
+Tables will be named naturally by their role (e.g., PAID_MEDIA_HARMONIZED, RPT_PAID_PERFORMANCE, MMM_MODEL_INPUT).
+
+Good to go, or want a different schema name?
+```
+
+If the user says "different name" — ask what they'd prefer. Accept whatever they give (as long as it follows Snowflake naming rules).
 
 **If the user isn't sure or struggles to pick:** Offer to run a quick discovery — show them their current role, available databases, and what they have access to. Let them pick from there.
 
@@ -251,9 +280,15 @@ SHOW GRANTS TO USER IDENTIFIER(CURRENT_USER());
 
 See `references/ACCOUNT_DISCOVERY.md` for full discovery patterns.
 
-**Synthetic data + own database guard:** If the user chose synthetic data (2c) AND then picks "My own database" or any non-sandbox environment, confirm before proceeding: "Just to confirm — I'll create synthetic tables in your [database] database. That OK, or would you rather use a sandbox?" This prevents accidentally cluttering a production database with fake tables.
+**Naming rules:**
+- No hyphens — Snowflake requires underscores
+- UPPER_SNAKE_CASE for all object names
+- Schema name should reflect the workflow/use-case, not be generic (e.g., `PS_MARKETING_HOL` not `MY_SCHEMA` or `TEST`)
+- If the guide/source suggests a name, offer that as the recommendation
 
-**STOP** — Confirm data + environment before proceeding to build.
+**Synthetic data + own database guard:** If the user chose synthetic data (2c) AND then picks a non-sandbox database, confirm before proceeding: "Just to confirm — I'll create synthetic tables in your [database] database. That OK, or would you rather use a sandbox?"
+
+**STOP** — Confirm data + destination (database.schema) before proceeding to build.
 
 ---
 
@@ -429,7 +464,60 @@ Keep it short: "Here's what you can do now:" followed by runnable examples. This
 
 #### Artifact 1: Build Summary
 
-See `references/BUILD_SUMMARY_TEMPLATE.md` for the complete template.
+```markdown
+# POC: [Workflow Title — describes what it does, not which feature]
+
+**Built on:** [date]
+**Source:** [URL]
+**Data:** [own data table or synthetic]
+**Environment:** [database.schema]
+
+## Workflow
+[What the pipeline does end-to-end]
+
+## Features used
+- [Feature 1]: [role in the workflow]
+- [Feature 2]: [role in the workflow]
+
+## Architecture
+[source] → [ingestion] → [transform] → [output]
+-- ASCII diagram showing how the pieces connect.
+-- Keep it simple: boxes and arrows, not a 50-line diagram.
+
+## Prerequisites & Permissions
+- **Role:** [role used] — needs [specific privileges]
+- **Warehouse:** [warehouse] — [size, DDL-capable]
+- **External access:** [any external stages, APIs, packages]
+-- Include everything someone else would need to reproduce this from scratch.
+
+## What was built
+- [Object type] [fully.qualified.name]: [purpose]
+- [Object type] [fully.qualified.name]: [purpose]
+
+## How to verify
+[SQL]
+
+## How to clean up
+-- IMPORTANT: Run drops in this order to avoid dependency errors.
+-- First suspend/drop tasks, then streams, then everything else.
+-- Only include DROP SCHEMA if the POC created the schema.
+-- If you built in a pre-existing schema, drop individual objects instead.
+ALTER TASK IF EXISTS [db.schema.task] SUSPEND;
+DROP TASK IF EXISTS [db.schema.task];
+DROP STREAM IF EXISTS [db.schema.stream];
+DROP PIPE IF EXISTS [db.schema.pipe];
+DROP VIEW IF EXISTS [db.schema.view];
+DROP TABLE IF EXISTS [db.schema.table];
+DROP STAGE IF EXISTS [db.schema.stage];
+-- DROP SCHEMA IF EXISTS [db.schema];  -- ONLY if this POC created the schema
+-- Only include warehouse/role drops if the POC created them
+
+## Scaling Notes
+-- One paragraph. What would change for production?
+-- Consider: warehouse sizing, clustering keys, partition pruning, task frequency, data volume.
+-- Example: "This POC used 28K rows on XS warehouse. For production volumes (10M+ rows),
+-- consider clustering on READING_TS, scaling to MEDIUM warehouse, and tightening task schedule."
+```
 
 Save to: `./poc-[workflow-slug]-summary.md`
 
